@@ -171,41 +171,31 @@ export function useCotizacion() {
       return { ...f, cantidad, precio, detalle, subtotal: cantidad * precio, modificado: true };
     });
 
-    // Mano de Obra y Obra Vendida como filas (si están activadas)
-    const areaRedondeada = Math.ceil(cot.area);
-    if (conManoObra && !conObraVendida) {
-      conEdicion.push({
-        clave: 'manoObra',
-        detalle: 'Mano de Obra',
-        cantidad: areaRedondeada,
-        precio: precios.manoObra,
-        subtotal: areaRedondeada * precios.manoObra,
-        editable: false,
-        esServicio: true,
-      });
-    }
-    if (conObraVendida) {
-      conEdicion.push({
-        clave: 'obraVendida',
-        detalle: 'Obra Vendida',
-        cantidad: areaRedondeada,
-        precio: precios.obraVendida,
-        subtotal: areaRedondeada * precios.obraVendida,
-        editable: false,
-        esServicio: true,
-      });
-    }
-
     return conEdicion;
-  }, [cot, placa, edicion, precios, conManoObra, conObraVendida]);
+  }, [cot, placa, edicion, precios]);
 
   // ---------- Totales ----------
   const subtotalMateriales = useMemo(
-    () => filas.filter((f) => !f.esServicio).reduce((acc, f) => acc + f.subtotal, 0),
+    () => filas.reduce((acc, f) => acc + f.subtotal, 0),
     [filas]
   );
 
-  const totalFinal = useMemo(() => filas.reduce((acc, f) => acc + f.subtotal, 0), [filas]);
+  // Mano de obra (fuera de la tabla, se suma al total si está activa)
+  const montoManoObra = useMemo(() => {
+    if (!cot) return 0;
+    return Math.ceil(cot.area) * precios.manoObra;
+  }, [cot, precios.manoObra]);
+
+  // Total final:
+  //  - Obra Vendida activa: SOLO área × 140 (ignora materiales y MO)
+  //  - Sino: materiales + (mano de obra si está activa)
+  const totalFinal = useMemo(() => {
+    if (!cot) return 0;
+    if (conObraVendida) {
+      return Math.ceil(cot.area) * precios.obraVendida;
+    }
+    return subtotalMateriales + (conManoObra ? montoManoObra : 0);
+  }, [cot, conObraVendida, conManoObra, subtotalMateriales, montoManoObra, precios.obraVendida]);
 
   return {
     W, L,
@@ -220,6 +210,7 @@ export function useCotizacion() {
     precios,
     conManoObra, setConManoObra,
     conObraVendida, setConObraVendida,
+    montoManoObra,
     subtotalMateriales, totalFinal,
   };
 }

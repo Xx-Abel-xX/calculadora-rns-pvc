@@ -96,17 +96,38 @@ export default function App() {
               </select>
             </div>
 
+            {/* Toggles de servicios FUERA de la tabla */}
+            <div className="servicios-toggle">
+              <label className="check">
+                <input
+                  type="checkbox"
+                  checked={cot.conManoObra}
+                  onChange={(e) => cot.setConManoObra(e.target.checked)}
+                  disabled={cot.conObraVendida}
+                />
+                <span>Mano de Obra</span>
+              </label>
+              <label className="check">
+                <input
+                  type="checkbox"
+                  checked={cot.conObraVendida}
+                  onChange={(e) => cot.setConObraVendida(e.target.checked)}
+                />
+                <span>Obra Vendida</span>
+              </label>
+            </div>
+
             {/* Tabla debajo */}
             <TablaMateriales
               filas={cot.filas}
               editarCelda={cot.editarCelda}
               restablecerFila={cot.restablecerFila}
-              conManoObra={cot.conManoObra}
-              setConManoObra={cot.setConManoObra}
-              conObraVendida={cot.conObraVendida}
-              setConObraVendida={cot.setConObraVendida}
               subtotalMateriales={cot.subtotalMateriales}
               totalFinal={cot.totalFinal}
+              conManoObra={cot.conManoObra}
+              montoManoObra={cot.montoManoObra}
+              conObraVendida={cot.conObraVendida}
+              area={cot.cot.area}
             />
           </section>
         ) : (

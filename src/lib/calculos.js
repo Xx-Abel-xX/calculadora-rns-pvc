@@ -105,7 +105,8 @@ export function calcularCotizacion(W, L, L_plate, orientacion) {
   const angulares = Math.ceil(perimetro / LARGO_PERFIL);
 
   // ---------- C. Consumibles y Acabados ----------
-  const cornisas = Math.ceil(perimetro / LARGO_PERFIL);
+  // Las cornisas son de 6 m (no 3 m como los perfiles)
+  const cornisas = Math.ceil(perimetro / 6);
   const bolsasT1 = Math.ceil(area / 20);
   const bolsasTarugos = Math.ceil(area / 20);
 
