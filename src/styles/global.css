@@ -1,0 +1,100 @@
+/* ============================================
+   RNS PVC - Estilos Globales (Tema Claro)
+   Blanco y negro, minimalista
+   ============================================ */
+
+:root {
+  /* Superficies */
+  --bg-base: #ffffff;
+  --bg-card: #ffffff;
+  --bg-input: #ffffff;
+  --bg-elevated: #f5f5f5;
+  --bg-hover: #fafafa;
+
+  /* Bordes */
+  --border: #e5e5e5;
+  --border-strong: #d4d4d4;
+
+  /* Texto */
+  --text-primary: #0a0a0a;
+  --text-secondary: #525252;
+  --text-muted: #a3a3a3;
+
+  /* Acento (solo uno, discreto) */
+  --accent: #0a0a0a;
+
+  /* Estados */
+  --highlight: #fafafa;
+  --modified: #737373;
+  --accent-ok: #16a34a;   /* borde sutil para indicar "óptima" */
+  --accent-blue: #2563eb; /* azul moderno para orientación óptima */
+
+  /* Tipografía */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* Radios */
+  --radius-sm: 4px;
+  --radius: 6px;
+
+  /* Transiciones */
+  --transition: 120ms ease;
+
+  color-scheme: light;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg-base);
+  color: var(--text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 14px;
+}
+
+#root {
+  min-height: 100%;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+}
+
+input, select {
+  font-family: inherit;
+  color: inherit;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #d4d4d4; border-radius: 5px; }
+
+/* Quitar spinners nativos (usaremos los nuestros) */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] { -moz-appearance: textfield; }
+
+*:focus { outline: none; }
+input:focus-visible,
+select:focus-visible {
+  outline: 1px solid var(--text-primary);
+  outline-offset: 0;
+}
