@@ -24,7 +24,6 @@ export function useCotizacion() {
   // Por defecto desactivados
   const [conManoObra, setConManoObra] = useState(false);
   const [conObraVendida, setConObraVendida] = useState(false);
-  const [cliente, setCliente] = useState('');
 
   // ---------- Mejor combinación automática ----------
   const mejorAuto = useMemo(() => {
@@ -211,6 +210,5 @@ export function useCotizacion() {
     conManoObra, setConManoObra,
     conObraVendida, setConObraVendida,
     subtotalMateriales, totalFinal,
-    cliente, setCliente,
   };
 }

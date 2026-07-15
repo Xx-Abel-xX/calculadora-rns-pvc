@@ -7,6 +7,7 @@ function Spinner({ value, onChange, step = 1, min = 0 }) {
   const dec = () => onChange(Math.max(min, Number(value) - step));
   return (
     <div className="spinner">
+      <button type="button" className="spinner__step" onClick={dec} aria-label="Restar">−</button>
       <input
         type="number"
         value={value}
@@ -15,10 +16,7 @@ function Spinner({ value, onChange, step = 1, min = 0 }) {
         onChange={(e) => onChange(e.target.value)}
         className="spinner__input"
       />
-      <span className="spinner__btns">
-        <button type="button" onClick={inc} aria-label="Subir">▴</button>
-        <button type="button" onClick={dec} aria-label="Bajar">▾</button>
-      </span>
+      <button type="button" className="spinner__step" onClick={inc} aria-label="Sumar">+</button>
     </div>
   );
 }
@@ -43,7 +41,7 @@ export default function TablaMateriales({
             <th className="col-num">Cant.</th>
             <th className="col-num">PU</th>
             <th className="col-num">Subtotal</th>
-            <th></th>
+            <th className="col-rest"></th>
           </tr>
         </thead>
         <tbody>
@@ -51,7 +49,7 @@ export default function TablaMateriales({
             <tr key={f.clave} className={f.esServicio ? 'fila-servicio' : (f.modificado ? 'fila-mod' : '')}>
               <td className="col-nombre">
                 {f.detalle}
-                {f.nota && !f.modificado && <span className="nota" title={f.nota}> · {f.nota}</span>}
+                {f.nota && !f.modificado && <span className="nota"> · {f.nota}</span>}
                 {f.modificado && <span className="marca" title="Modificado">●</span>}
               </td>
               <td className="col-num">
@@ -77,13 +75,13 @@ export default function TablaMateriales({
                 )}
               </td>
               <td className="col-num col-subtotal">{f.subtotal.toLocaleString('es-BO')}</td>
-              <td className="col-accion">
+              <td className="col-rest">
                 {f.modificado && (
                   <button
                     type="button"
                     className="btn-reset"
                     onClick={() => restablecerFila(f.clave)}
-                    title="Restablecer"
+                    aria-label="Restablecer"
                   >↺</button>
                 )}
               </td>

@@ -91,53 +91,6 @@ export default function App() {
               subtotalMateriales={cot.subtotalMateriales}
               totalFinal={cot.totalFinal}
             />
-
-            <div className="acciones no-print">
-              <input
-                type="text"
-                placeholder="Cliente (opcional)"
-                value={cot.cliente}
-                onChange={(e) => cot.setCliente(e.target.value)}
-                className="input-cliente"
-              />
-              <button type="button" className="btn-print" onClick={() => window.print()}>
-                Imprimir / PDF
-              </button>
-            </div>
-
-            {/* Bloque de impresión */}
-            <div className="print-only">
-              <header className="print-header">
-                <h1>RNS PVC</h1>
-                <p>Cotización de Cielo Falso · Santa Cruz, Bolivia</p>
-              </header>
-              <section className="print-datos">
-                <p><strong>Cliente:</strong> {cot.cliente || '—'}</p>
-                <p><strong>Dimensiones:</strong> {cot.W} m × {cot.L} m = {cot.cot.area.toFixed(2)} m²</p>
-                <p><strong>Placa:</strong> {cot.placa.codigo} {cot.placa.largo}m ({cot.placa.espesor})</p>
-                <p><strong>Orientación:</strong> {cot.orientacion === 'L' ? 'Largo' : 'Ancho'}</p>
-              </section>
-              <table className="print-table">
-                <thead>
-                  <tr>
-                    <th>Detalle</th><th>Cant.</th><th>PU</th><th>Subtotal</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {cot.filas.map((f) => (
-                    <tr key={f.clave}>
-                      <td>{f.detalle}</td>
-                      <td>{f.cantidad}</td>
-                      <td>{f.precio}</td>
-                      <td>{f.subtotal}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <div className="print-total">
-                <p>Total: <strong>{cot.totalFinal} Bs</strong></p>
-              </div>
-            </div>
           </section>
         ) : (
           <section className="placeholder no-print">
