@@ -1,45 +1,18 @@
-// Inputs simples para Ancho y Largo. Sin sliders ni rangos.
-// Cuando están vacíos muestran un "0" animado (slot machine 1-9 -> 0).
+// Dos cajas grandes (Ancho × Largo) con efecto scramble.
+// Estilo del wireframe: cajas grandes, números grandes, un × en el medio.
 
-import CeroAnimado from './CeroAnimado.jsx';
+import ScrambleInput from './ScrambleInput.jsx';
 
 export default function Dimensiones({ W, L, setW, setL }) {
-  const Placeholder = () => (
-    <span className="placeholder-anim"><CeroAnimado />.00</span>
-  );
-
   return (
-    <div className="inputs-row">
-      <div className="input-group">
-        <label htmlFor="input-W">Ancho (m)</label>
-        <div className="input-wrap">
-          <input
-            id="input-W"
-            type="number"
-            min="0"
-            step="0.01"
-            placeholder=""
-            value={W}
-            onChange={(e) => setW(e.target.value)}
-          />
-          {!W && <span className="input-placeholder"><Placeholder /></span>}
-        </div>
-      </div>
-      <div className="input-group">
-        <label htmlFor="input-L">Largo (m)</label>
-        <div className="input-wrap">
-          <input
-            id="input-L"
-            type="number"
-            min="0"
-            step="0.01"
-            placeholder=""
-            value={L}
-            onChange={(e) => setL(e.target.value)}
-          />
-          {!L && <span className="input-placeholder"><Placeholder /></span>}
-        </div>
-      </div>
+    <div className="scramble-row">
+      <ScrambleInput value={W} onChange={setW} label="m" delay={0.1} />
+      <span className="scramble-x" aria-hidden="true">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M18 6L6 18M6 6l12 12" />
+        </svg>
+      </span>
+      <ScrambleInput value={L} onChange={setL} label="m" delay={0.25} />
     </div>
   );
 }

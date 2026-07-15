@@ -3,7 +3,7 @@
    Mobile-first, touch-friendly (dedos grandes)
    ============================================ */
 
-/* ---------- Animación de aparición global ---------- */
+/* ---------- Animación de aparición global (stagger) ---------- */
 .header,
 .main > * {
   animation: aparicion 500ms cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -12,6 +12,21 @@
 .panel { animation-delay: 60ms; }
 .placeholder { animation-delay: 120ms; }
 .footer { animation-delay: 180ms; }
+
+/* Cajas scramble con stagger cascada (como el wireframe) */
+.scramble-row .scramble:nth-child(1),
+.scramble-row .scramble-x,
+.scramble-row .scramble:nth-child(3) {
+  animation: aparicion 500ms ease both;
+}
+.scramble-row .scramble:nth-child(1) { animation-delay: 100ms; }
+.scramble-row .scramble-x            { animation-delay: 250ms; }
+.scramble-row .scramble:nth-child(3) { animation-delay: 250ms; }
+
+/* Botón CALCULAR aparece último */
+.btn-calc {
+  animation: aparicion 500ms ease 400ms both;
+}
 
 @keyframes aparicion {
   from { opacity: 0; transform: translateY(12px); }
@@ -65,13 +80,58 @@
   margin-bottom: 0.75rem;
 }
 
-/* ---------- Inputs ---------- */
-.inputs-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+/* ---------- Cajas Scramble (Ancho × Largo) ---------- */
+.scramble-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
   gap: 0.75rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: 1rem;
 }
+.scramble {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex: 1;
+}
+.scramble__label {
+  position: absolute;
+  top: -1.5rem;
+  right: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+.scramble__input {
+  width: 100%;
+  height: 96px;
+  font-size: 2.5rem;
+  font-weight: 500;
+  text-align: left;
+  padding: 0 0 0 1.25rem;
+  border: 2px solid var(--border-strong);
+  border-radius: var(--radius);
+  outline: none;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  transition: border-color var(--transition);
+}
+.scramble__input:focus {
+  border-color: var(--text-primary);
+}
+.scramble-x {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  margin-top: 2rem;
+  color: var(--text-primary);
+  flex-shrink: 0;
+}
+
+/* ---------- Inputs comunes (selects, etc.) ---------- */
 .input-group {
   display: flex;
   flex-direction: column;
@@ -91,7 +151,6 @@
   font-size: 1rem;
   color: var(--text-primary);
   transition: border-color var(--transition);
-  /* touch-friendly: mínimo 44px de alto */
   min-height: 44px;
 }
 .input-group input:focus,
@@ -103,17 +162,19 @@
 /* ---------- Botón Calcular ---------- */
 .btn-calc {
   width: 100%;
-  padding: 0.85rem;
+  padding: 1.1rem;
   background: var(--text-primary);
   color: var(--bg-base);
-  font-weight: 600;
-  font-size: 1rem;
-  border-radius: var(--radius-sm);
+  font-weight: 500;
+  font-size: 1.25rem;
+  letter-spacing: 0.05em;
+  border-radius: var(--radius);
   transition: opacity var(--transition);
-  margin-top: 0.25rem;
-  min-height: 48px;
+  margin-top: 1rem;
+  min-height: 56px;
 }
 .btn-calc:hover:not(:disabled) { opacity: 0.85; }
+.btn-calc:active:not(:disabled) { transform: scale(0.98); }
 .btn-calc:disabled {
   background: var(--border-strong);
   color: var(--text-muted);
@@ -339,29 +400,6 @@
 .num-animado {
   font-variant-numeric: tabular-nums;
   display: inline-block;
-}
-
-/* ---------- Cero animado (placeholder inputs) ---------- */
-.input-wrap {
-  position: relative;
-}
-.input-placeholder {
-  position: absolute;
-  top: 50%;
-  right: 0.7rem;
-  transform: translateY(-50%);
-  color: var(--text-muted);
-  font-size: 1rem;
-  pointer-events: none;
-  display: flex;
-  align-items: center;
-}
-.cero-anim {
-  display: inline-block;
-  min-width: 0.6em;
-  text-align: center;
-  font-variant-numeric: tabular-nums;
-  color: var(--text-secondary);
 }
 
 /* ---------- Spinner touch-friendly ---------- */

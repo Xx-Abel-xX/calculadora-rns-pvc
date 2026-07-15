@@ -1,10 +1,8 @@
-import { useState } from 'react';
 import { useCotizacion } from './hooks/useCotizacion.js';
 import Dimensiones from './components/Dimensiones.jsx';
 import TablaMateriales from './components/TablaMateriales.jsx';
 import Visualizador from './components/Visualizador.jsx';
 import NumeroAnimado from './components/NumeroAnimado.jsx';
-import CeroAnimado from './components/CeroAnimado.jsx';
 import { PLACAS } from './data/inventario.js';
 
 export default function App() {
