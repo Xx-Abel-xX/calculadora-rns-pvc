@@ -43,7 +43,7 @@ export const PLACAS = [
     espesor: '0.8 mm',
     precio: 50,
     variantes: [
-      { codigo: 'QAC-2500', color: 'Madera Nogal' },
+      { codigo: 'QAC-2500', color: 'Blanco' },
       { codigo: 'QAC-2532', color: 'Madera' },
       { codigo: 'AU-2545', color: 'Blanco Ceja' },
     ],
