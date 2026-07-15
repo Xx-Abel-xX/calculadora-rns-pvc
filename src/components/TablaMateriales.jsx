@@ -77,7 +77,7 @@ export default function TablaMateriales({
                   <span>{f.precio}</span>
                 )}
               </td>
-              <td className="col-num col-subtotal"><NumeroAnimado valor={f.subtotal} duracion={600} /></td>
+              <td className="col-num col-subtotal"><NumeroAnimado valor={f.subtotal} duracion={250} /></td>
               <td className="col-rest">
                 {f.modificado && (
                   <button
@@ -118,11 +118,11 @@ export default function TablaMateriales({
         <div className="totales">
           <div className="linea-sub">
             <span>Subtotal</span>
-            <span><NumeroAnimado valor={subtotalMateriales} duracion={800} /> Bs</span>
+            <span><NumeroAnimado valor={subtotalMateriales} duracion={300} /> Bs</span>
           </div>
           <div className="linea-total">
             <span>Total</span>
-            <span><NumeroAnimado valor={totalFinal} duracion={1000} /> Bs</span>
+            <span><NumeroAnimado valor={totalFinal} duracion={350} /> Bs</span>
           </div>
         </div>
       </div>
