@@ -29,6 +29,11 @@
   --accent-ok: #16a34a;   /* borde sutil para indicar "óptima" */
   --accent-blue: #2563eb; /* azul moderno para orientación óptima */
 
+  /* Acentos de marca (para splash y leyendas) */
+  --accent-green: #10b981;
+  --accent-cyan: #06b6d4;
+  --accent-amber: #f59e0b;
+
   /* Tipografía */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 

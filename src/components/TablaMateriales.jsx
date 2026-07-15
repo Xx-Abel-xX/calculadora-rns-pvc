@@ -2,6 +2,8 @@
 // Solo Cant y PU son editables. Unión H aparece solo si requiere.
 // Mano de Obra y Obra Vendida como filas (toggles, off por defecto).
 
+import NumeroAnimado from './NumeroAnimado.jsx';
+
 function Spinner({ value, onChange, step = 1, min = 0 }) {
   const inc = () => onChange(Number(value) + step);
   const dec = () => onChange(Math.max(min, Number(value) - step));
@@ -75,7 +77,7 @@ export default function TablaMateriales({
                   <span>{f.precio}</span>
                 )}
               </td>
-              <td className="col-num col-subtotal">{f.subtotal.toLocaleString('es-BO')}</td>
+              <td className="col-num col-subtotal"><NumeroAnimado valor={f.subtotal} duracion={600} /></td>
               <td className="col-rest">
                 {f.modificado && (
                   <button
@@ -116,11 +118,11 @@ export default function TablaMateriales({
         <div className="totales">
           <div className="linea-sub">
             <span>Subtotal</span>
-            <span>{subtotalMateriales.toLocaleString('es-BO')} Bs</span>
+            <span><NumeroAnimado valor={subtotalMateriales} duracion={800} /> Bs</span>
           </div>
           <div className="linea-total">
             <span>Total</span>
-            <span>{totalFinal.toLocaleString('es-BO')} Bs</span>
+            <span><NumeroAnimado valor={totalFinal} duracion={1000} /> Bs</span>
           </div>
         </div>
       </div>
