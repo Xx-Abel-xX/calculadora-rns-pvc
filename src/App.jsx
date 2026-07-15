@@ -3,19 +3,16 @@ import { useCotizacion } from './hooks/useCotizacion.js';
 import Dimensiones from './components/Dimensiones.jsx';
 import TablaMateriales from './components/TablaMateriales.jsx';
 import Visualizador from './components/Visualizador.jsx';
-import IntroSplash from './components/IntroSplash.jsx';
 import NumeroAnimado from './components/NumeroAnimado.jsx';
+import CeroAnimado from './components/CeroAnimado.jsx';
 import { PLACAS } from './data/inventario.js';
 
 export default function App() {
   const cot = useCotizacion();
-  const [splash, setSplash] = useState(true);
 
   return (
     <>
-      {splash && <IntroSplash onFinish={() => setSplash(false)} />}
-
-      <header className={`header no-print ${splash ? 'header--hidden' : ''}`}>
+      <header className="header no-print">
         <div className="header__brand">
           <span className="header__logo">RNS</span>
           <span className="header__name">Cotizador PVC</span>

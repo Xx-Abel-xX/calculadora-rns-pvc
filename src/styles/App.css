@@ -3,78 +3,18 @@
    Mobile-first, touch-friendly (dedos grandes)
    ============================================ */
 
-/* ---------- Splash de presentación ---------- */
-.splash {
-  position: fixed;
-  inset: 0;
-  background: var(--bg-base);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 100;
-  animation: splashFadeIn 300ms ease;
+/* ---------- Animación de aparición global ---------- */
+.header,
+.main > * {
+  animation: aparicion 500ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
-.splash--out {
-  animation: splashFadeOut 600ms ease forwards;
-  pointer-events: none;
-}
-.splash__logo {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.75rem;
-}
-.splash__bars {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  width: 56px;
-  animation: barsScale 600ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
-}
-.splash__bar {
-  display: block;
-  height: 12px;
-  border-radius: 3px;
-  transform-origin: left center;
-  animation: barIn 500ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
-}
-.splash__bar--1 { background: var(--accent-green); animation-delay: 100ms; }
-.splash__bar--2 { background: var(--accent-cyan);  animation-delay: 220ms; }
-.splash__bar--3 { background: var(--accent-amber); animation-delay: 340ms; }
-.splash__text {
-  font-size: 2rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  opacity: 0;
-  animation: textIn 500ms ease 500ms forwards;
-}
-.splash__text strong { font-weight: 800; }
-.splash__sub {
-  font-size: 0.9rem;
-  color: var(--text-muted);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  opacity: 0;
-  animation: textIn 500ms ease 700ms forwards;
-}
+.header { animation-delay: 0ms; }
+.panel { animation-delay: 60ms; }
+.placeholder { animation-delay: 120ms; }
+.footer { animation-delay: 180ms; }
 
-@keyframes splashFadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-@keyframes splashFadeOut {
-  to { opacity: 0; transform: scale(1.05); }
-}
-@keyframes barsScale {
-  from { transform: scale(0.7); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
-}
-@keyframes barIn {
-  from { transform: scaleX(0); opacity: 0; }
-  to { transform: scaleX(1); opacity: 1; }
-}
-@keyframes textIn {
-  from { opacity: 0; transform: translateY(8px); }
+@keyframes aparicion {
+  from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -82,15 +22,6 @@
 .header {
   padding: 1rem 1.25rem;
   border-bottom: 1px solid var(--border);
-  animation: headerIn 400ms ease both;
-}
-.header--hidden {
-  opacity: 0;
-  animation: none;
-}
-@keyframes headerIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 .header__brand {
   display: flex;
@@ -408,6 +339,29 @@
 .num-animado {
   font-variant-numeric: tabular-nums;
   display: inline-block;
+}
+
+/* ---------- Cero animado (placeholder inputs) ---------- */
+.input-wrap {
+  position: relative;
+}
+.input-placeholder {
+  position: absolute;
+  top: 50%;
+  right: 0.7rem;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 1rem;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+.cero-anim {
+  display: inline-block;
+  min-width: 0.6em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
 }
 
 /* ---------- Spinner touch-friendly ---------- */
