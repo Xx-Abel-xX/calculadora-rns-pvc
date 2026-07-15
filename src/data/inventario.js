@@ -1,36 +1,57 @@
 // ============================================
 // INVENTARIO Y PRECIOS DEFAULT - RNS PVC
-// Hardcoded. Los precios son editables en sesión
-// pero NO persisten (al recargar vuelven a estos).
+// Códigos de tienda reales para identificación.
 // ============================================
 
 export const ANCHO_PLACA = 0.25; // metros (estándar)
 export const LARGO_PERFIL = 3;   // metros (estándar)
 
 // ---- Catálogo de placas de PVC ----
+// Cada placa (material) tiene variantes por color, cada una con su código de tienda.
+// Se agrupa por familia (QAC-UV, AU-UVU, UVU) y por largo (6m o 4m).
 export const PLACAS = [
   {
     id: 'QAC-UV-6',
-    codigo: 'QAC-UV',
+    familia: 'QAC-UV',
     largo: 6,
     espesor: '0.7 mm',
     precio: 67,
+    variantes: [
+      { codigo: 'QAC-2543', color: 'Madera Acanelado' },
+      { codigo: 'QAC-2541', color: 'Blanco Franja' },
+      { codigo: 'QAC-2524', color: 'Madera Nogal' },
+      { codigo: 'QAC-2500', color: 'Blanco' },
+      { codigo: 'QAC-2532', color: 'Madera' },
+    ],
   },
   {
     id: 'AU-UVU-6',
-    codigo: 'AU-UVU',
+    familia: 'AU-UVU',
     largo: 6,
     espesor: '0.8 mm',
     precio: 72,
+    variantes: [
+      { codigo: 'AU-2511', color: 'Blanco Cepillado' },
+      { codigo: 'AU-2502', color: 'Blanco Madera' },
+      { codigo: 'AU-2545', color: 'Blanco Ceja' },
+    ],
   },
   {
     id: 'UVU-4',
-    codigo: 'UVU',
+    familia: 'UVU',
     largo: 4,
     espesor: '0.8 mm',
     precio: 50,
+    variantes: [
+      { codigo: 'QAC-2500', color: 'Madera Nogal' },
+      { codigo: 'QAC-2532', color: 'Madera' },
+      { codigo: 'AU-2545', color: 'Blanco Ceja' },
+    ],
   },
 ];
+
+// Compatibilidad hacia atrás (algunas partes usan .codigo)
+PLACAS.forEach((p) => { p.codigo = p.familia; });
 
 // ---- Items no-placa del inventario ----
 export const ITEMS = {

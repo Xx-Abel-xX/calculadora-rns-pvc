@@ -79,6 +79,22 @@ export default function App() {
               />
             </div>
 
+            {/* Selector de variante/color antes de la tabla */}
+            <div className="variante-selector">
+              <label htmlFor="select-variante">Color / Código</label>
+              <select
+                id="select-variante"
+                value={cot.varianteIdx[cot.placa.id] ?? 0}
+                onChange={(e) => cot.setVarianteIdx((prev) => ({ ...prev, [cot.placa.id]: Number(e.target.value) }))}
+              >
+                {cot.placa.variantes.map((v, i) => (
+                  <option key={v.codigo} value={i}>
+                    {v.codigo} · {v.color}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             {/* Tabla debajo */}
             <TablaMateriales
               filas={cot.filas}

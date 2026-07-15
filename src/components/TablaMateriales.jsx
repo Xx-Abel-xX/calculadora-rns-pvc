@@ -34,6 +34,7 @@ export default function TablaMateriales({
 }) {
   return (
     <div className="tabla-wrap">
+     <div className="tabla-scroll">
       <table className="tabla">
         <thead>
           <tr>
@@ -89,6 +90,7 @@ export default function TablaMateriales({
           ))}
         </tbody>
       </table>
+     </div>
 
       {/* Toggles de servicios */}
       <div className="tabla-footer">

@@ -25,6 +25,9 @@ export function useCotizacion() {
   const [conManoObra, setConManoObra] = useState(false);
   const [conObraVendida, setConObraVendida] = useState(false);
 
+  // Variante (color/código) seleccionada para cada material
+  const [varianteIdx, setVarianteIdx] = useState({}); // { [placaId]: indiceVariante }
+
   // ---------- Mejor combinación automática ----------
   const mejorAuto = useMemo(() => {
     if (!calculado) return null;
@@ -37,6 +40,13 @@ export function useCotizacion() {
     if (placaIdManual) return PLACAS.find((p) => p.id === placaIdManual) ?? mejorAuto?.placa;
     return mejorAuto?.placa;
   }, [calculado, placaIdManual, mejorAuto]);
+
+  // ---------- Variante (color/código de tienda) efectiva ----------
+  const variante = useMemo(() => {
+    if (!placa) return null;
+    const idx = varianteIdx[placa.id] ?? 0;
+    return placa.variantes[idx] ?? placa.variantes[0];
+  }, [placa, varianteIdx]);
 
   // ---------- Orientación óptima para la placa actual ----------
   const orientacionOptima = useMemo(() => {
@@ -123,8 +133,8 @@ export function useCotizacion() {
   const filas = useMemo(() => {
     if (!cot || !placa) return [];
 
-    // Detalle = código + largo del material (ej. "UVU 4m", "QAC-UV 6m")
-    const detallePlaca = `${placa.codigo} ${placa.largo}m`;
+    // Detalle = código de tienda de la variante seleccionada (ej. "QAC-2500")
+    const detallePlaca = variante ? variante.codigo : placa.familia;
     const precioPlaca = precios[`placa:${placa.id}`] ?? placa.precio;
 
     const base = [
@@ -202,6 +212,7 @@ export function useCotizacion() {
     setW: setWReset, setL: setLReset,
     calculado, calcular,
     cot, placa, orientacion, orientacionOptima, esOptima,
+    variante, varianteIdx, setVarianteIdx,
     filas,
     placaIdManual, setMaterial,
     orientacionManual, toggleOrientacion,
