@@ -2,8 +2,27 @@
 // Replica el formato de la empresa: header, tabla, A Cuenta/Saldo, firmas.
 // Se abre con el botón "Compartir" y se puede imprimir / guardar como PDF.
 
-import { useState, useMemo } from 'react';
-import LogoRNS from './LogoRNS.jsx';
+import { useState, useMemo, useEffect, useRef } from 'react';
+
+// El logo está en public/, se referencia con ruta absoluta relativa al base.
+const logoUrl = `${import.meta.env.BASE_URL}logo-rns.png`;
+
+// Hook: calcula el scale para que un elemento de ancho fijo entre en el viewport
+function useEscalarEnViewport(anchoDoc = 800) {
+  const [scale, setScale] = useState(1);
+  useEffect(() => {
+    const calc = () => {
+      const vw = window.innerWidth;
+      // Deja 16px de margen total
+      const disponible = vw - 16;
+      setScale(Math.min(1, disponible / anchoDoc));
+    };
+    calc();
+    window.addEventListener('resize', calc);
+    return () => window.removeEventListener('resize', calc);
+  }, [anchoDoc]);
+  return scale;
+}
 
 // Genera el siguiente número de proforma y lo guarda (localStorage por ahora)
 function siguienteNumeroProforma() {
@@ -25,6 +44,7 @@ function fechaLarga(d = new Date()) {
 export default function Proforma({ cot, onCerrar }) {
   const numero = useMemo(() => siguienteNumeroProforma(), []);
   const fecha = useMemo(() => fechaLarga(), []);
+  const scale = useEscalarEnViewport(800);
 
   // Datos del cliente (editables en la proforma)
   const [cliente, setCliente] = useState({ nombre: '', direccion: '', telefono: '' });
@@ -38,16 +58,25 @@ export default function Proforma({ cot, onCerrar }) {
 
   return (
     <div className="prof-overlay">
-      <div className="prof-toolbar no-print">
+      <div className="prof-toolbar no-print" style={{ transform: `scale(${scale})`, transformOrigin: 'top center' }}>
         <button className="btn-ghost" onClick={onCerrar}>← Volver</button>
         <button className="btn-primary" onClick={() => window.print()}>Imprimir / PDF</button>
       </div>
 
-      <div className="prof-doc">
+      <div
+        className="prof-scaler"
+        style={{
+          transform: `scale(${scale})`,
+          transformOrigin: 'top center',
+          width: 800,
+          margin: '0 auto',
+        }}
+      >
+        <div className="prof-doc">
         {/* Header */}
         <div className="prof-head">
           <div className="prof-head__izq">
-            <LogoRNS size={90} />
+            <img src={logoUrl} alt="RNS PVC" className="prof-logo" />
             <div className="prof-head__empresa">
               <strong>RNS PVC</strong>
               <span>Olivera</span>
@@ -166,6 +195,7 @@ export default function Proforma({ cot, onCerrar }) {
         <div className="prof-firmas">
           <div className="prof-firma">Entregué Conforme</div>
           <div className="prof-firma">Recibí Conforme</div>
+        </div>
         </div>
       </div>
     </div>
