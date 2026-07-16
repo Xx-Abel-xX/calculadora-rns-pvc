@@ -23,6 +23,12 @@ jobs:
         with:
           node-version: 20
           cache: npm
+      # Inyectar las credenciales de Supabase desde GitHub Secrets
+      # Vite las lee como variables de entorno durante el build
+      - name: Crear .env para el build
+        run: |
+          echo "VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}" > .env
+          echo "VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }}" >> .env
       - run: npm ci
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3
