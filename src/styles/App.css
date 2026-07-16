@@ -64,6 +64,26 @@
   margin: 0 auto;
   padding: 1rem;
 }
+/* En mobile la tabla ocupa todo el ancho sin márgenes laterales */
+@media (max-width: 600px) {
+  .main {
+    padding: 0.75rem 0;
+  }
+  .panel,
+  .resultado,
+  .tabla-wrap {
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+  .resultado {
+    padding: 0 0.5rem;
+  }
+  .panel {
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
 .panel {
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -345,9 +365,37 @@
 .servicios-toggle {
   display: flex;
   gap: 1.25rem;
-  align-items: center;
+  align-items: flex-start;
   flex-wrap: wrap;
   padding: 0.25rem 0;
+}
+.servicio-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.servicio-item--disabled { opacity: 0.5; }
+.servicio-precio {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-left: 32px; /* alinea con el texto del checkbox */
+}
+.servicio-precio__input {
+  width: 72px;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-input);
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  text-align: right;
+  min-height: 38px;
+}
+.servicio-precio__input:focus { border-color: var(--text-primary); }
+.servicio-precio__unidad {
+  font-size: 0.78rem;
+  color: var(--text-muted);
 }
 .check {
   display: inline-flex;
@@ -389,23 +437,25 @@
   width: 100%;
   min-width: 460px;
   border-collapse: collapse;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 .tabla thead th {
   background: var(--bg-elevated);
   font-weight: 600;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.03em;
   color: var(--text-secondary);
-  padding: 0.6rem 0.6rem;
+  padding: 0.45rem 0.5rem;
   text-align: left;
   border-bottom: 1px solid var(--border);
+  white-space: nowrap;
 }
 .tabla tbody td {
-  padding: 0.5rem 0.6rem;
+  padding: 0.4rem 0.5rem;
   border-bottom: 1px solid var(--border);
   vertical-align: middle;
+  white-space: nowrap;
 }
 .tabla tbody tr:last-child td { border-bottom: none; }
 .col-num { text-align: right; }
@@ -445,8 +495,8 @@
   background: var(--bg-base);
 }
 .spinner__step {
-  width: 34px;
-  font-size: 1.1rem;
+  width: 28px;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--text-primary);
   background: var(--bg-elevated);
@@ -454,20 +504,20 @@
   align-items: center;
   justify-content: center;
   transition: var(--transition);
-  min-height: 34px;
+  min-height: 28px;
 }
 .spinner__step:hover { background: var(--text-primary); color: var(--bg-base); }
 .spinner__step:active { transform: scale(0.95); }
 .spinner__input {
-  width: 44px;
-  padding: 0.3rem 0.2rem;
+  width: 38px;
+  padding: 0.25rem 0.15rem;
   border: none;
   background: transparent;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   text-align: center;
   color: var(--text-primary);
   font-weight: 500;
-  min-height: 34px;
+  min-height: 28px;
 }
 .spinner__input:focus { background: var(--bg-hover); }
 

@@ -96,25 +96,54 @@ export default function App() {
               </select>
             </div>
 
-            {/* Toggles de servicios FUERA de la tabla */}
+            {/* Toggles de servicios FUERA de la tabla (con precio editable) */}
             <div className="servicios-toggle">
-              <label className="check">
-                <input
-                  type="checkbox"
-                  checked={cot.conManoObra}
-                  onChange={(e) => cot.setConManoObra(e.target.checked)}
-                  disabled={cot.conObraVendida}
-                />
-                <span>Mano de Obra</span>
-              </label>
-              <label className="check">
-                <input
-                  type="checkbox"
-                  checked={cot.conObraVendida}
-                  onChange={(e) => cot.setConObraVendida(e.target.checked)}
-                />
-                <span>Obra Vendida</span>
-              </label>
+              <div className={`servicio-item ${cot.conObraVendida ? 'servicio-item--disabled' : ''}`}>
+                <label className="check">
+                  <input
+                    type="checkbox"
+                    checked={cot.conManoObra}
+                    onChange={(e) => cot.setConManoObra(e.target.checked)}
+                    disabled={cot.conObraVendida}
+                  />
+                  <span>Mano de Obra</span>
+                </label>
+                {cot.conManoObra && !cot.conObraVendida && (
+                  <div className="servicio-precio">
+                    <input
+                      type="number"
+                      min="0"
+                      value={cot.precios.manoObra}
+                      onChange={(e) => cot.setPrecioServicio('manoObra', e.target.value)}
+                      className="servicio-precio__input"
+                    />
+                    <span className="servicio-precio__unidad">Bs/m²</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="servicio-item">
+                <label className="check">
+                  <input
+                    type="checkbox"
+                    checked={cot.conObraVendida}
+                    onChange={(e) => cot.setConObraVendida(e.target.checked)}
+                  />
+                  <span>Obra Vendida</span>
+                </label>
+                {cot.conObraVendida && (
+                  <div className="servicio-precio">
+                    <input
+                      type="number"
+                      min="0"
+                      value={cot.precios.obraVendida}
+                      onChange={(e) => cot.setPrecioServicio('obraVendida', e.target.value)}
+                      className="servicio-precio__input"
+                    />
+                    <span className="servicio-precio__unidad">Bs/m²</span>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Tabla debajo */}

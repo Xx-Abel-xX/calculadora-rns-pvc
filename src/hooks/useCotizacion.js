@@ -197,6 +197,11 @@ export function useCotizacion() {
     return subtotalMateriales + (conManoObra ? montoManoObra : 0);
   }, [cot, conObraVendida, conManoObra, subtotalMateriales, montoManoObra, precios.obraVendida]);
 
+  // Editar precio de un servicio (manoObra u obraVendida)
+  const setPrecioServicio = useCallback((clave, valor) => {
+    setPrecios((prev) => ({ ...prev, [clave]: Math.max(0, Number(valor) || 0) }));
+  }, []);
+
   return {
     W, L,
     setW: setWReset, setL: setLReset,
@@ -211,6 +216,7 @@ export function useCotizacion() {
     conManoObra, setConManoObra,
     conObraVendida, setConObraVendida,
     montoManoObra,
+    setPrecioServicio,
     subtotalMateriales, totalFinal,
   };
 }
