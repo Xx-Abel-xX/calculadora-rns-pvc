@@ -79,7 +79,17 @@ export default function TablaMateriales({
                     <span>{f.precio}</span>
                   )}
                 </td>
-                <td className="col-num col-subtotal"><NumeroAnimado valor={f.subtotal} duracion={250} /></td>
+                <td className="col-num col-subtotal">
+                  {f.esManoObra ? (
+                    <Spinner
+                      value={f.subtotal}
+                      onChange={(v) => editarCelda(f.clave, 'subtotal', v)}
+                      step={10}
+                    />
+                  ) : (
+                    <NumeroAnimado valor={f.subtotal} duracion={250} />
+                  )}
+                </td>
                 <td className="col-rest">
                   {f.modificado && (
                     <button
@@ -101,18 +111,9 @@ export default function TablaMateriales({
         {!conObraVendida ? (
           <div className="totales">
             <div className="linea-sub">
-              <span>Subtotal materiales</span>
+              <span>Subtotal</span>
               <span><NumeroAnimado valor={subtotalMateriales} duracion={300} /> Bs</span>
             </div>
-            {conManoObra && (
-              <div className="linea-sub">
-                <span>
-                  Mano de Obra
-                  {esAreaMinima && <span className="nota-area-min"> · mín 9 m²</span>}
-                </span>
-                <span><NumeroAnimado valor={montoManoObra} duracion={300} /> Bs</span>
-              </div>
-            )}
             <div className="linea-total">
               <span>Total</span>
               <span><NumeroAnimado valor={totalFinal} duracion={350} /> Bs</span>

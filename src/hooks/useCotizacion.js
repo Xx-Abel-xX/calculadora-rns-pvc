@@ -179,7 +179,7 @@ export function useCotizacion() {
       ...prev,
       [clave]: {
         ...prev[clave],
-        [campo]: campo === 'cantidad' || campo === 'precio'
+        [campo]: campo === 'cantidad' || campo === 'precio' || campo === 'subtotal'
           ? Math.max(0, Number(valor) || 0)
           : valor,
       },
@@ -265,6 +265,19 @@ export function useCotizacion() {
       });
     }
 
+    // Mano de Obra como fila (solo si está activa y no Obra Vendida)
+    if (conManoObra && !conObraVendida) {
+      const areaRedondeada = Math.ceil(Math.max(cot.area, config.area_minima ?? 9));
+      filasBase.push({
+        clave: 'manoObra',
+        detalle: 'Mano de Obra',
+        cantidad: areaRedondeada,
+        precio: preciosEfectivos.manoObra ?? 30,
+        editable: true,
+        esManoObra: true,
+      });
+    }
+
     // Aplicar ediciones
     return filasBase.map((f) => {
       const ed = edicion[f.clave];
@@ -272,13 +285,14 @@ export function useCotizacion() {
       const cantidad = ed.cantidad ?? f.cantidad;
       const precio = ed.precio ?? f.precio;
       const detalle = ed.detalle ?? f.detalle;
-      return { ...f, cantidad, precio, detalle, subtotal: cantidad * precio, modificado: true };
+      const subtotal = ed.subtotal ?? cantidad * precio;
+      return { ...f, cantidad, precio, detalle, subtotal, modificado: true };
     });
-  }, [cot, placa, variante, productos, edicion, preciosEfectivos]);
+  }, [cot, placa, variante, productos, edicion, preciosEfectivos, conManoObra, conObraVendida, config.area_minima]);
 
   // ---------- Totales ----------
   const subtotalMateriales = useMemo(
-    () => filas.reduce((acc, f) => acc + f.subtotal, 0),
+    () => filas.filter((f) => !f.esManoObra).reduce((acc, f) => acc + f.subtotal, 0),
     [filas]
   );
 
@@ -296,12 +310,13 @@ export function useCotizacion() {
     return Math.ceil(areaFacturable) * (preciosEfectivos.manoObra ?? 30);
   }, [areaFacturable, preciosEfectivos, manoObraOverride]);
 
+  // Total: si hay MO como fila, ya está incluida en filas; si Obra Vendida, anula todo
   const totalFinal = useMemo(() => {
     if (conObraVendida) {
       return Math.ceil(areaFacturable) * (preciosEfectivos.obraVendida ?? 140);
     }
-    return subtotalMateriales + (conManoObra ? montoManoObra : 0);
-  }, [conObraVendida, conManoObra, subtotalMateriales, montoManoObra, areaFacturable, preciosEfectivos]);
+    return filas.reduce((acc, f) => acc + f.subtotal, 0);
+  }, [conObraVendida, filas, areaFacturable, preciosEfectivos]);
 
   const setPrecioServicio = useCallback((clave, valor) => {
     setPrecios((prev) => ({ ...prev, [clave]: Math.max(0, Number(valor) || 0) }));
@@ -310,8 +325,20 @@ export function useCotizacion() {
   const setMontoManoObra = useCallback((valor) => {
     if (valor === '' || valor === null) {
       setManoObraOverride(null);
+      // limpiar override de subtotal en edicion
+      setEdicion((prev) => {
+        const copia = { ...prev };
+        if (copia.manoObra) delete copia.manoObra;
+        return copia;
+      });
     } else {
-      setManoObraOverride(Math.max(0, Number(valor) || 0));
+      const v = Math.max(0, Number(valor) || 0);
+      setManoObraOverride(v);
+      // Aplicar como subtotal override de la fila
+      setEdicion((prev) => ({
+        ...prev,
+        manoObra: { ...prev.manoObra, subtotal: v },
+      }));
     }
   }, []);
 

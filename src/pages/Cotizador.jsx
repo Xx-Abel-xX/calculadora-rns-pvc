@@ -112,33 +112,6 @@ export default function Cotizador() {
                 />
                 <span>Mano de Obra</span>
               </label>
-              {cot.conManoObra && !cot.conObraVendida && (
-                <div className="servicio-mo">
-                  <div className="servicio-precio">
-                    <input
-                      type="number"
-                      min="0"
-                      value={cot.precios.manoObra ?? 30}
-                      onChange={(e) => cot.setPrecioServicio('manoObra', e.target.value)}
-                      className="servicio-precio__input"
-                      title="Precio por m²"
-                    />
-                    <span className="servicio-precio__unidad">Bs/m²</span>
-                  </div>
-                  <div className="servicio-mo-total">
-                    <label>Subtotal MO</label>
-                    <input
-                      type="number"
-                      min="0"
-                      value={cot.manoObraOverride ?? cot.montoManoObra}
-                      onChange={(e) => cot.setMontoManoObra(e.target.value)}
-                      className="servicio-mo-total__input"
-                      title="Editá el monto final de mano de obra"
-                    />
-                    <span className="servicio-precio__unidad">Bs</span>
-                  </div>
-                </div>
-              )}
             </div>
             <div className="servicio-item">
               <label className="check">

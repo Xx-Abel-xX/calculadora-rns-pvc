@@ -154,12 +154,9 @@ export default function Proforma({ cot, onCerrar }) {
           <div className="prof-tabla__body">
             {filasVisibles.map((f) => (
               <div className="prof-tabla__fila" key={f.clave}>
-                <span>{f.cantidad}</span>
-                <span>
-                  {f.detalle}
-                  {cot.conManoObra && f.clave !== 'manoObra' && false ? '' : ''}
-                </span>
-                <span>{f.precio}</span>
+                <span>{f.esManoObra ? '' : f.cantidad}</span>
+                <span>{f.detalle}</span>
+                <span>{f.esManoObra ? '' : f.precio}</span>
                 <span>{f.subtotal.toLocaleString('es-BO')}</span>
               </div>
             ))}
