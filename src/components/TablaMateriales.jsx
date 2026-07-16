@@ -33,6 +33,8 @@ export default function TablaMateriales({
   montoManoObra,
   conObraVendida,
   area,
+  areaFacturable,
+  esAreaMinima,
 }) {
   return (
     <div className={`tabla-wrap ${conObraVendida ? 'tabla-wrap--disabled' : ''}`}>
@@ -104,7 +106,10 @@ export default function TablaMateriales({
             </div>
             {conManoObra && (
               <div className="linea-sub">
-                <span>Mano de Obra</span>
+                <span>
+                  Mano de Obra
+                  {esAreaMinima && <span className="nota-area-min"> · mín 9 m²</span>}
+                </span>
                 <span><NumeroAnimado valor={montoManoObra} duracion={300} /> Bs</span>
               </div>
             )}
@@ -116,7 +121,10 @@ export default function TablaMateriales({
         ) : (
           <div className="totales">
             <div className="linea-obra-vendida">
-              <span>Obra Vendida ({Math.ceil(area)} m² × 140)</span>
+              <span>
+                Obra Vendida ({Math.ceil(areaFacturable)} m² × 140)
+                {esAreaMinima && <span className="nota-area-min"> · mín 9 m²</span>}
+              </span>
             </div>
             <div className="linea-total">
               <span>Total</span>

@@ -415,6 +415,13 @@
 .check input:disabled { cursor: not-allowed; opacity: 0.4; }
 .check:has(input:disabled) { opacity: 0.5; }
 
+.nota-area-min {
+  font-size: 0.72rem;
+  color: var(--accent-amber);
+  font-style: italic;
+  font-weight: 400;
+}
+
 /* ---------- Tabla ---------- */
 .tabla-wrap {
   border: 1px solid var(--border);

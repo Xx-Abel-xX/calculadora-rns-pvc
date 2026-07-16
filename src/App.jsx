@@ -157,6 +157,8 @@ export default function App() {
               montoManoObra={cot.montoManoObra}
               conObraVendida={cot.conObraVendida}
               area={cot.cot.area}
+              areaFacturable={cot.areaFacturable}
+              esAreaMinima={cot.areaFacturable > cot.cot.area}
             />
           </section>
         ) : (

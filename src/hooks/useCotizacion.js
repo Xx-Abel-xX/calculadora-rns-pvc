@@ -180,22 +180,30 @@ export function useCotizacion() {
     [filas]
   );
 
+  // ---------- ÁREA FACTURABLE ----------
+  // Regla de negocio RNS PVC: tarifa mínima por área de 3x3 m (9 m²).
+  // Los materiales usan el área real (no comprar de más).
+  // Los servicios (Mano de Obra, Obra Vendida) usan el área facturable.
+  const AREA_MINIMA = 9;
+  const areaFacturable = useMemo(() => {
+    if (!cot) return AREA_MINIMA;
+    return Math.max(cot.area, AREA_MINIMA);
+  }, [cot]);
+
   // Mano de obra (fuera de la tabla, se suma al total si está activa)
   const montoManoObra = useMemo(() => {
-    if (!cot) return 0;
-    return Math.ceil(cot.area) * precios.manoObra;
-  }, [cot, precios.manoObra]);
+    return Math.ceil(areaFacturable) * precios.manoObra;
+  }, [areaFacturable, precios.manoObra]);
 
   // Total final:
-  //  - Obra Vendida activa: SOLO área × 140 (ignora materiales y MO)
+  //  - Obra Vendida activa: SOLO áreaFacturable × 140 (ignora materiales y MO)
   //  - Sino: materiales + (mano de obra si está activa)
   const totalFinal = useMemo(() => {
-    if (!cot) return 0;
     if (conObraVendida) {
-      return Math.ceil(cot.area) * precios.obraVendida;
+      return Math.ceil(areaFacturable) * precios.obraVendida;
     }
     return subtotalMateriales + (conManoObra ? montoManoObra : 0);
-  }, [cot, conObraVendida, conManoObra, subtotalMateriales, montoManoObra, precios.obraVendida]);
+  }, [conObraVendida, conManoObra, subtotalMateriales, montoManoObra, areaFacturable, precios.obraVendida]);
 
   // Editar precio de un servicio (manoObra u obraVendida)
   const setPrecioServicio = useCallback((clave, valor) => {
@@ -215,7 +223,7 @@ export function useCotizacion() {
     precios,
     conManoObra, setConManoObra,
     conObraVendida, setConObraVendida,
-    montoManoObra,
+    montoManoObra, areaFacturable,
     setPrecioServicio,
     subtotalMateriales, totalFinal,
   };
