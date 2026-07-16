@@ -1017,3 +1017,352 @@
   .main { padding: 1.5rem; }
   .panel { padding: 1.25rem; }
 }
+
+/* ============================================
+   MANO DE OBRA - inputs extras
+   ============================================ */
+.servicio-mo {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-left: 32px;
+}
+.servicio-mo-total {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.servicio-mo-total label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  white-space: nowrap;
+}
+.servicio-mo-total__input {
+  width: 80px;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--accent-amber, #f59e0b);
+  background: rgba(245, 158, 11, 0.06);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: right;
+  min-height: 38px;
+}
+.servicio-mo-total__input:focus { border-color: var(--text-primary); }
+
+/* ============================================
+   BOTÓN COMPARTIR
+   ============================================ */
+.compartir-wrap {
+  display: flex;
+  justify-content: center;
+}
+.btn-compartir {
+  padding: 0.7rem 2.5rem;
+  background: var(--text-primary);
+  color: var(--bg-base);
+  font-weight: 600;
+  font-size: 1rem;
+  border-radius: var(--radius);
+  transition: var(--transition);
+  min-height: 48px;
+}
+.btn-compartir:hover { opacity: 0.85; }
+.btn-compartir:active { transform: scale(0.98); }
+
+/* ============================================
+   PROFORMA (vista limpia)
+   ============================================ */
+.prof-overlay {
+  position: fixed;
+  inset: 0;
+  background: #e5e5e5;
+  overflow-y: auto;
+  z-index: 200;
+  padding: 0.5rem;
+}
+@media (min-width: 768px) {
+  .prof-overlay { padding: 1rem; }
+}
+
+.prof-toolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  max-width: 800px;
+  margin: 0 auto 0.75rem;
+}
+
+/* Documento tipo hoja */
+.prof-doc {
+  background: #fff;
+  max-width: 800px;
+  margin: 0 auto;
+  border: 2px solid #000;
+  padding: 1.5rem;
+  color: #000;
+  font-size: 13px;
+}
+@media (min-width: 768px) {
+  .prof-doc { padding: 2rem; font-size: 14px; }
+}
+
+/* Header */
+.prof-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+.prof-head__izq {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.4rem;
+}
+.prof-head__empresa {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+.prof-head__empresa strong { font-size: 1.3rem; letter-spacing: 0.05em; }
+.prof-head__empresa span { font-weight: 600; }
+
+.prof-head__medio {
+  display: none;
+  align-items: center;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  line-height: 1.3;
+}
+@media (min-width: 640px) { .prof-head__medio { display: flex; } }
+
+.prof-head__der {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+.prof-fecha {
+  display: flex;
+  gap: 0.4rem;
+}
+.prof-fecha > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.prof-fecha small {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.prof-fecha span {
+  border: 2px solid #000;
+  min-width: 36px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  padding: 0 4px;
+  font-size: 0.8rem;
+}
+.prof-fecha__mes { font-size: 0.65rem !important; min-width: 56px; }
+.prof-badge {
+  border: 2px solid #000;
+  font-weight: 700;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  text-align: center;
+}
+.prof-titulo h1 {
+  font-size: 1.8rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  -webkit-text-stroke: 1.5px #000;
+  color: transparent;
+  line-height: 1;
+}
+.prof-num {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+/* Cliente */
+.prof-cliente {
+  margin-bottom: 1rem;
+}
+.prof-linea {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  border-bottom: 2px dashed #000;
+  padding-bottom: 3px;
+  margin-bottom: 0.75rem;
+}
+.prof-linea label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.prof-linea input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-weight: 700;
+  font-size: 0.85rem;
+  outline: none;
+  min-width: 0;
+}
+.prof-linea-row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.prof-linea-row .prof-linea { margin-bottom: 0.75rem; }
+.prof-linea--chica { flex: 0 0 180px; }
+
+/* Tabla */
+.prof-tabla {
+  border: 2px solid #000;
+  margin-bottom: 1.5rem;
+}
+.prof-tabla__head {
+  display: grid;
+  grid-template-columns: 56px 1fr 80px 90px;
+  background: #000;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.prof-tabla__head span {
+  padding: 0.5rem;
+  text-align: center;
+  border-right: 2px solid #fff;
+}
+.prof-tabla__head span:last-child { border-right: none; }
+@media (min-width: 640px) {
+  .prof-tabla__head { grid-template-columns: 70px 1fr 110px 120px; font-size: 0.8rem; }
+}
+
+.prof-tabla__fila {
+  display: grid;
+  grid-template-columns: 56px 1fr 80px 90px;
+  border-bottom: 2px dashed #000;
+}
+.prof-tabla__fila span {
+  padding: 0.4rem 0.5rem;
+  font-weight: 600;
+  border-right: 2px solid #000;
+  font-size: 0.82rem;
+}
+.prof-tabla__fila span:first-child { text-align: center; }
+.prof-tabla__fila span:nth-child(3) { text-align: right; }
+.prof-tabla__fila span:last-child { text-align: right; border-right: none; font-weight: 700; }
+.prof-tabla__fila--vacia { min-height: 26px; }
+.prof-tabla__fila--vacia span { border-right: 2px solid #000; }
+.prof-tabla__fila--vacia span:last-child { border-right: none; }
+@media (min-width: 640px) {
+  .prof-tabla__fila { grid-template-columns: 70px 1fr 110px 120px; }
+}
+
+/* Footer tabla */
+.prof-tabla__foot {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto 100px;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border-top: 2px solid #000;
+}
+@media (min-width: 640px) {
+  .prof-tabla__foot { grid-template-columns: 1fr 1fr auto 130px; }
+}
+.prof-ac {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.prof-ac label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.prof-ac input {
+  width: 80px;
+  border: 2px solid #000;
+  padding: 0.35rem 0.5rem;
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-align: right;
+  background: #fff;
+}
+.prof-ac input[readonly] { background: #f5f5f5; }
+.prof-total-label {
+  font-weight: 700;
+  font-size: 0.78rem;
+  text-align: center;
+  padding: 0 0.5rem;
+  border-left: 2px solid #000;
+  border-right: 2px solid #000;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.prof-total-val {
+  font-weight: 900;
+  font-size: 1.1rem;
+  text-align: right;
+  padding: 0 0.5rem;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+/* Firmas */
+.prof-firmas {
+  display: flex;
+  justify-content: space-between;
+  padding: 2.5rem 2rem 0.5rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.prof-firma {
+  width: 180px;
+  border-top: 2px solid #000;
+  text-align: center;
+  padding-top: 0.4rem;
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+/* ============================================
+   PRINT - solo la proforma
+   ============================================ */
+@media print {
+  body * { visibility: hidden; }
+  .prof-overlay, .prof-overlay * { visibility: visible; }
+  .prof-overlay {
+    position: absolute;
+    inset: 0;
+    background: #fff;
+    padding: 0;
+  }
+  .prof-doc { border: none; max-width: 100%; padding: 1rem; }
+  .no-print { display: none !important; }
+  @page { margin: 1cm; }
+}

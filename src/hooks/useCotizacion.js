@@ -157,6 +157,7 @@ export function useCotizacion() {
     setPrecios({}); // reset rebajas temporales
     setPlacaIdManual(null);
     setOrientacionManual(null);
+    setManoObraOverride(null);
     setCalculado(true);
     return true;
   }, [W, L]);
@@ -287,9 +288,13 @@ export function useCotizacion() {
     return Math.max(cot.area, AREA_MINIMA);
   }, [cot, AREA_MINIMA]);
 
+  // Override manual del monto de Mano de Obra (null = usar cálculo automático)
+  const [manoObraOverride, setManoObraOverride] = useState(null);
+
   const montoManoObra = useMemo(() => {
+    if (manoObraOverride !== null) return manoObraOverride;
     return Math.ceil(areaFacturable) * (preciosEfectivos.manoObra ?? 30);
-  }, [areaFacturable, preciosEfectivos]);
+  }, [areaFacturable, preciosEfectivos, manoObraOverride]);
 
   const totalFinal = useMemo(() => {
     if (conObraVendida) {
@@ -300,6 +305,14 @@ export function useCotizacion() {
 
   const setPrecioServicio = useCallback((clave, valor) => {
     setPrecios((prev) => ({ ...prev, [clave]: Math.max(0, Number(valor) || 0) }));
+  }, []);
+
+  const setMontoManoObra = useCallback((valor) => {
+    if (valor === '' || valor === null) {
+      setManoObraOverride(null);
+    } else {
+      setManoObraOverride(Math.max(0, Number(valor) || 0));
+    }
   }, []);
 
   return {
@@ -317,7 +330,8 @@ export function useCotizacion() {
     placasDisponibles,
     conManoObra, setConManoObra,
     conObraVendida, setConObraVendida,
-    montoManoObra, areaFacturable,
+    montoManoObra, manoObraOverride, setMontoManoObra,
+    areaFacturable,
     subtotalMateriales, totalFinal,
     usandoFallback,
   };

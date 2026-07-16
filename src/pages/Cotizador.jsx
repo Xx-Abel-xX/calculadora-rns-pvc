@@ -1,13 +1,15 @@
 // Página del Cotizador (la app original, ahora movida a su propia página).
 
+import { useState } from 'react';
 import { useCotizacion } from '../hooks/useCotizacion.js';
 import Dimensiones from '../components/Dimensiones.jsx';
 import TablaMateriales from '../components/TablaMateriales.jsx';
 import Visualizador from '../components/Visualizador.jsx';
-import NumeroAnimado from '../components/NumeroAnimado.jsx';
+import Proforma from '../components/Proforma.jsx';
 
 export default function Cotizador() {
   const cot = useCotizacion();
+  const [verProforma, setVerProforma] = useState(false);
 
   if (cot.placasDisponibles.length === 0) {
     return (
@@ -111,15 +113,30 @@ export default function Cotizador() {
                 <span>Mano de Obra</span>
               </label>
               {cot.conManoObra && !cot.conObraVendida && (
-                <div className="servicio-precio">
-                  <input
-                    type="number"
-                    min="0"
-                    value={cot.precios.manoObra ?? 30}
-                    onChange={(e) => cot.setPrecioServicio('manoObra', e.target.value)}
-                    className="servicio-precio__input"
-                  />
-                  <span className="servicio-precio__unidad">Bs/m²</span>
+                <div className="servicio-mo">
+                  <div className="servicio-precio">
+                    <input
+                      type="number"
+                      min="0"
+                      value={cot.precios.manoObra ?? 30}
+                      onChange={(e) => cot.setPrecioServicio('manoObra', e.target.value)}
+                      className="servicio-precio__input"
+                      title="Precio por m²"
+                    />
+                    <span className="servicio-precio__unidad">Bs/m²</span>
+                  </div>
+                  <div className="servicio-mo-total">
+                    <label>Subtotal MO</label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={cot.manoObraOverride ?? cot.montoManoObra}
+                      onChange={(e) => cot.setMontoManoObra(e.target.value)}
+                      className="servicio-mo-total__input"
+                      title="Editá el monto final de mano de obra"
+                    />
+                    <span className="servicio-precio__unidad">Bs</span>
+                  </div>
                 </div>
               )}
             </div>
@@ -160,6 +177,18 @@ export default function Cotizador() {
             areaFacturable={cot.areaFacturable}
             esAreaMinima={cot.areaFacturable > cot.cot.area}
           />
+
+          {/* Botón Compartir */}
+          <div className="compartir-wrap">
+            <button className="btn-compartir" onClick={() => setVerProforma(true)}>
+              Compartir
+            </button>
+          </div>
+
+          {/* Proforma en limpio */}
+          {verProforma && (
+            <Proforma cot={cot} onCerrar={() => setVerProforma(false)} />
+          )}
         </section>
       ) : (
         <section className="placeholder">
