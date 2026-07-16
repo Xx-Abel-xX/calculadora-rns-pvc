@@ -428,35 +428,48 @@
   pointer-events: none;
   filter: grayscale(0.5);
 }
-/* Contenedor con scroll horizontal en mobile */
+/* Contenedor sin scroll horizontal: la tabla se ajusta al ancho */
 .tabla-scroll {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow-x: hidden;
 }
 .tabla {
   width: 100%;
-  min-width: 460px;
   border-collapse: collapse;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
+  table-layout: fixed;
 }
 .tabla thead th {
   background: var(--bg-elevated);
   font-weight: 600;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.02em;
   color: var(--text-secondary);
-  padding: 0.45rem 0.5rem;
+  padding: 0.4rem 0.35rem;
   text-align: left;
   border-bottom: 1px solid var(--border);
-  white-space: nowrap;
 }
 .tabla tbody td {
-  padding: 0.4rem 0.5rem;
+  padding: 0.35rem 0.35rem;
   border-bottom: 1px solid var(--border);
   vertical-align: middle;
+}
+/* Columna Detalle: permite wrap para ocupar el espacio disponible */
+.col-nombre {
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.25;
+}
+/* Columnas numéricas sin wrap */
+.col-num, .col-rest {
   white-space: nowrap;
 }
+/* Distribución de anchos de columna (table-layout: fixed) */
+.tabla th:nth-child(1), .tabla td:nth-child(1) { width: 30%; } /* Detalle */
+.tabla th:nth-child(2), .tabla td:nth-child(2) { width: 22%; } /* Cant */
+.tabla th:nth-child(3), .tabla td:nth-child(3) { width: 22%; } /* PU */
+.tabla th:nth-child(4), .tabla td:nth-child(4) { width: 18%; } /* Subtotal */
+.tabla th:nth-child(5), .tabla td:nth-child(5) { width: 8%; }  /* reset */
 .tabla tbody tr:last-child td { border-bottom: none; }
 .col-num { text-align: right; }
 .col-nombre { font-weight: 500; }
@@ -495,8 +508,8 @@
   background: var(--bg-base);
 }
 .spinner__step {
-  width: 28px;
-  font-size: 1rem;
+  width: 24px;
+  font-size: 0.95rem;
   font-weight: 600;
   color: var(--text-primary);
   background: var(--bg-elevated);
@@ -504,20 +517,20 @@
   align-items: center;
   justify-content: center;
   transition: var(--transition);
-  min-height: 28px;
+  min-height: 24px;
 }
 .spinner__step:hover { background: var(--text-primary); color: var(--bg-base); }
 .spinner__step:active { transform: scale(0.95); }
 .spinner__input {
-  width: 38px;
-  padding: 0.25rem 0.15rem;
+  width: 30px;
+  padding: 0.2rem 0.1rem;
   border: none;
   background: transparent;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   text-align: center;
   color: var(--text-primary);
   font-weight: 500;
-  min-height: 28px;
+  min-height: 24px;
 }
 .spinner__input:focus { background: var(--bg-hover); }
 
