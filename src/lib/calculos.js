@@ -1,43 +1,49 @@
 // ============================================
 // LÓGICA MATEMÁTICA Y REGLAS DE NEGOCIO - RNS PVC
-// Función pura: cálculo de materiales para una orientación dada.
 // Generalizada: maneja cualquier cantidad de empalmes (Unión H).
+// Las constantes vienen de config (DB) con defaults para no romper.
 // ============================================
 
-import { ANCHO_PLACA, LARGO_PERFIL } from '../data/inventario.js';
+// Defaults si no se pasa config (mantienen la app funcionando)
+const DEFAULTS = {
+  anchoPlaca: 0.25,
+  largoPerfil: 3,
+  espaciadoMontantes: 1.2,
+  espaciadoOmegas: 0.6,
+  largoCornisa: 6,
+  rendimientoTornillos: 20,
+  umbralRefuerzoMontantes: 16,
+};
 
 /**
- * Calcula todas las cantidades de materiales para una habitación
- * dado un ancho W, largo L, largo de placa L_plate y orientación.
+ * Calcula todas las cantidades de materiales.
  *
- * Convención de orientación:
- *   orientacion === 'L'  -> las placas corren a lo largo del LARGO L (D_plates = L)
- *   orientacion === 'W'  -> las placas corren a lo largo del ANCHO W (D_plates = W)
- *
- * @param {number} W           Ancho de la habitación (m)
- * @param {number} L           Largo de la habitación (m)
- * @param {number} L_plate     Largo de la placa seleccionada (4 o 6 m)
+ * @param {number} W           Ancho (m)
+ * @param {number} L           Largo (m)
+ * @param {number} L_plate     Largo de placa (4 o 6)
  * @param {'L'|'W'} orientacion
- * @returns {object} Desglose completo de cantidades + metadata de cálculo
+ * @param {object} cfg         Configuración desde DB (opcional)
  */
-export function calcularCotizacion(W, L, L_plate, orientacion) {
+export function calcularCotizacion(W, L, L_plate, orientacion, cfg = {}) {
   W = Number(W);
   L = Number(L);
   L_plate = Number(L_plate);
 
-  // Dimensiones paralela y perpendicular a las placas
+  // Merge config
+  const c = { ...DEFAULTS, ...cfg };
+  const anchoPlaca = Number(c.anchoPlaca);
+  const largoPerfil = Number(c.largoPerfil);
+
   const D_plates = orientacion === 'L' ? L : W;
   const D_perp   = orientacion === 'L' ? W : L;
 
   const perimetro = 2 * (W + L);
   const area = W * L;
 
-  // ---------- A. Placas y Unión H (generalizado) ----------
-  const filas = Math.ceil(D_perp / ANCHO_PLACA);
-
-  // ¿Cuántas placas por fila se necesitan para cubrir D_plates?
+  // ---------- A. Placas y Unión H ----------
+  const filas = Math.ceil(D_perp / anchoPlaca);
   const placasPorFila = Math.ceil(D_plates / L_plate);
-  const empalmesPorFila = placasPorFila - 1; // cantidad de líneas de Unión H por fila
+  const empalmesPorFila = placasPorFila - 1;
 
   let totalPlacas;
   let requiereUnionH;
@@ -45,72 +51,50 @@ export function calcularCotizacion(W, L, L_plate, orientacion) {
   let infoCorte = '';
 
   if (placasPorFila <= 1) {
-    // La placa cubre todo el largo: sin empalmes
     requiereUnionH = false;
     unionH_piezas = 0;
     totalPlacas = filas;
     infoCorte = `Cobertura completa: ${D_plates.toFixed(2)} m ≤ ${L_plate} m de placa`;
   } else {
-    // Requiere empalmes (1 o más líneas de Unión H)
     requiereUnionH = true;
-
-    // Piezas de perfil H: cada línea de empalme corre perpendicular a las placas
-    // y debe cubrir D_perp metros con perfiles de 3m.
-    unionH_piezas = empalmesPorFila * Math.ceil(D_perp / LARGO_PERFIL);
-
-    // ---- Optimización de retazos ----
-    // El último segmento de cada fila mide: D_plates - (placasPorFila-1) * L_plate
-    // Si ese segmento es exactamente L_plate (múltiplo exacto), no hay retazo.
+    unionH_piezas = empalmesPorFila * Math.ceil(D_perp / largoPerfil);
     const retazo = D_plates - (placasPorFila - 1) * L_plate;
 
     if (retazo >= L_plate - 0.0001) {
-      // Múltiplo exacto: sin retazo, todas las placas son enteras
       totalPlacas = filas * placasPorFila;
       infoCorte = `${placasPorFila} placa(s) por fila × ${filas} filas = ${totalPlacas} placas (corte exacto)`;
     } else {
-      // Hay retazo: las primeras (placasPorFila-1) son enteras, la última es un retazo.
-      // De una placa nueva de L_plate se pueden cortar varios retazos.
       const cortesPorPlaca = Math.floor(L_plate / retazo);
-
       if (cortesPorPlaca >= 1) {
-        // Se pueden cortar varios retazos de una sola placa
         const placasParaRetazos = Math.ceil(filas / cortesPorPlaca);
         const placasEnterasPorFila = placasPorFila - 1;
         totalPlacas = filas * placasEnterasPorFila + placasParaRetazos;
         infoCorte = `${placasEnterasPorFila} entera(s) + retazos de ${retazo.toFixed(2)} m por fila · ${cortesPorPlaca} retazo(s) por placa → ${totalPlacas} placas`;
       } else {
-        // No se puede optimizar (retazo mayor que la placa, caso raro)
         totalPlacas = filas * placasPorFila;
         infoCorte = `${placasPorFila} placa(s) por fila × ${filas} filas = ${totalPlacas} placas`;
       }
     }
   }
 
-  // ---------- B. Estructura de Perfiles ----------
-  // Montantes: paralelos a las placas, cada 1.2 m
-  const lineasMontantes = Math.ceil(D_perp / 1.2);
+  // ---------- B. Estructura ----------
+  const lineasMontantes = Math.ceil(D_perp / c.espaciadoMontantes);
   const metrosMontantes = lineasMontantes * D_plates;
-  const montantesBase = Math.ceil(metrosMontantes / LARGO_PERFIL);
-  // Regla RNS PVC: +1 montante de refuerzo por cada 4x4 m (16 m²) de área.
-  // Cubre el "+1" de habitaciones chicas y escala en grandes.
-  const refuerzosMontantes = Math.ceil(area / 16);
+  const montantesBase = Math.ceil(metrosMontantes / largoPerfil);
+  const refuerzosMontantes = Math.ceil(area / c.umbralRefuerzoMontantes);
   const montantes = montantesBase + refuerzosMontantes;
 
-  // Omegas: perpendiculares a las placas, cada 0.6 m
-  const lineasOmegas = Math.ceil(D_plates / 0.6);
+  const lineasOmegas = Math.ceil(D_plates / c.espaciadoOmegas);
   const metrosOmegas = lineasOmegas * D_perp;
-  const omegas = Math.ceil(metrosOmegas / LARGO_PERFIL);
+  const omegas = Math.ceil(metrosOmegas / largoPerfil);
 
-  // Angulares: perimetral
-  const angulares = Math.ceil(perimetro / LARGO_PERFIL);
+  const angulares = Math.ceil(perimetro / largoPerfil);
 
-  // ---------- C. Consumibles y Acabados ----------
-  // Las cornisas son de 6 m (no 3 m como los perfiles)
-  const cornisas = Math.ceil(perimetro / 6);
-  const bolsasT1 = Math.ceil(area / 20);
-  const bolsasTarugos = Math.ceil(area / 20);
+  // ---------- C. Consumibles ----------
+  const cornisas = Math.ceil(perimetro / c.largoCornisa);
+  const bolsasT1 = Math.ceil(area / c.rendimientoTornillos);
+  const bolsasTarugos = Math.ceil(area / c.rendimientoTornillos);
 
-  // ---------- Cantidades por clave ----------
   const cantidades = {
     placa: totalPlacas,
     montante: montantes,
@@ -125,9 +109,7 @@ export function calcularCotizacion(W, L, L_plate, orientacion) {
   return {
     W, L, L_plate, orientacion,
     D_plates, D_perp, perimetro, area,
-
     cantidades,
-
     filas,
     placasPorFila,
     empalmesPorFila,
@@ -135,12 +117,10 @@ export function calcularCotizacion(W, L, L_plate, orientacion) {
     unionH_piezas,
     infoCorte,
     totalPlacas,
-
     montantesBase,
     montantes,
     omegas,
     angulares,
-
     cornisas,
     bolsasT1,
     bolsasTarugos,

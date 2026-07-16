@@ -4,7 +4,6 @@
 //   orientacion 'W' -> placas VERTICALES,   Unión H HORIZONTAL
 
 import { useEffect, useRef } from 'react';
-import { ANCHO_PLACA } from '../data/inventario.js';
 
 export default function Visualizador({ W, L, orientacion, cot }) {
   const canvasRef = useRef(null);
@@ -45,12 +44,14 @@ export default function Visualizador({ W, L, orientacion, cot }) {
       const D_plates = orientacion === 'L' ? L : W;
       const D_perp   = orientacion === 'L' ? W : L;
 
-      // ---- Placas: separadores cada 0.25 m (perpendicular a las placas) ----
+      // ---- Placas: separadores cada anchoPlaca (perpendicular a las placas) ----
       ctx.strokeStyle = '#a3a3a3';
       ctx.lineWidth = 1;
-      const nFilas = Math.ceil(D_perp / ANCHO_PLACA);
+      // Derivar anchoPlaca desde cot (más robusto que importar constante)
+      const anchoPlaca = cot && cot.filas ? D_perp / cot.filas : 0.25;
+      const nFilas = cot?.filas ?? Math.ceil(D_perp / 0.25);
       for (let i = 1; i < nFilas; i++) {
-        const offset = i * ANCHO_PLACA * escala;
+        const offset = i * anchoPlaca * escala;
         ctx.beginPath();
         if (placasHorizontales) {
           const y = oy + offset;
