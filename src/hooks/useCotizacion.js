@@ -278,17 +278,26 @@ export function useCotizacion() {
       });
     }
 
+    // Monto mínimo de mano de obra (regla de negocio: 3x3 = 450 Bs)
+    const montoMinimoMO = config.monto_minimo_mano_obra ?? 450;
+
     // Aplicar ediciones
     return filasBase.map((f) => {
       const ed = edicion[f.clave];
-      if (!ed) return { ...f, subtotal: f.cantidad * f.precio, modificado: false };
+      // Subtotal base: para Mano de Obra aplica el mínimo (no baja de 450)
+      const calcularSubtotal = () => {
+        const calc = f.cantidad * f.precio;
+        if (f.esManoObra) return Math.max(calc, montoMinimoMO);
+        return calc;
+      };
+      if (!ed) return { ...f, subtotal: calcularSubtotal(), modificado: false };
       const cantidad = ed.cantidad ?? f.cantidad;
       const precio = ed.precio ?? f.precio;
       const detalle = ed.detalle ?? f.detalle;
-      const subtotal = ed.subtotal ?? cantidad * precio;
+      const subtotal = ed.subtotal ?? calcularSubtotal();
       return { ...f, cantidad, precio, detalle, subtotal, modificado: true };
     });
-  }, [cot, placa, variante, productos, edicion, preciosEfectivos, conManoObra, conObraVendida, config.area_minima]);
+  }, [cot, placa, variante, productos, edicion, preciosEfectivos, conManoObra, conObraVendida, config.area_minima, config.monto_minimo_mano_obra]);
 
   // ---------- Totales ----------
   const subtotalMateriales = useMemo(

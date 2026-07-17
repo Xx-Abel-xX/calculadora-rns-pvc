@@ -190,6 +190,7 @@ insert into public.variantes (producto_id, codigo, precio) values
 -- ---------- CONFIGURACION ----------
 insert into public.configuracion (clave, valor, descripcion) values
   ('area_minima',                 9,    'Tarifa minima facturable en m² (3x3)'),
+  ('monto_minimo_mano_obra',     450,   'Monto minimo de mano de obra en Bs (3x3)'),
   ('espaciado_montantes',         1.2,  'Separacion entre montantes en metros'),
   ('espaciado_omegas',            0.6,  'Separacion entre omegas en metros'),
   ('largo_cornisa',               6,    'Largo de cornisa en metros'),

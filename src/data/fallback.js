@@ -65,6 +65,7 @@ export const INVENTARIO_FALLBACK = {
   ],
   config: {
     area_minima: 9,
+    monto_minimo_mano_obra: 450,
     espaciado_montantes: 1.2,
     espaciado_omegas: 0.6,
     largo_cornisa: 6,
