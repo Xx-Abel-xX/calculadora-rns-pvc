@@ -7,16 +7,16 @@
 
 // IDs estables (strings en fallback para diferenciar)
 const CATS = {
-  placa:          { id: 'cat-placa',          nombre: 'Placa PVC',         slug: 'placa',          rol: 'placa',      unidad_default: 'pza',       requiere_dimensiones: true,  requiere_color: true,  orden: 1,  activo: true },
-  montante:       { id: 'cat-montante',       nombre: 'Montante',          slug: 'montante',       rol: 'perfil',     unidad_default: 'pza (3 m)', requiere_dimensiones: true,  requiere_color: false, orden: 2,  activo: true },
-  omega:          { id: 'cat-omega',          nombre: 'Omega',             slug: 'omega',          rol: 'perfil',     unidad_default: 'pza (3 m)', requiere_dimensiones: true,  requiere_color: false, orden: 3,  activo: true },
-  angulo:         { id: 'cat-angulo',         nombre: 'Angulo',            slug: 'angulo',         rol: 'perfil',     unidad_default: 'pza (3 m)', requiere_dimensiones: true,  requiere_color: false, orden: 4,  activo: true },
-  cornisa:        { id: 'cat-cornisa',        nombre: 'Cornisa',           slug: 'cornisa',        rol: 'cornisa',    unidad_default: 'pza (6 m)', requiere_dimensiones: true,  requiere_color: true,  orden: 5,  activo: true },
-  union_h:        { id: 'cat-union_h',        nombre: 'Union H',           slug: 'union_h',        rol: 'union',      unidad_default: 'pza (6 m)', requiere_dimensiones: true,  requiere_color: false, orden: 6,  activo: true },
-  tornillo_t1:    { id: 'cat-tornillo_t1',    nombre: 'Tornillo T1',       slug: 'tornillo_t1',    rol: 'consumible', unidad_default: 'bolsa',     requiere_dimensiones: false, requiere_color: false, orden: 7,  activo: true },
-  tornillo_tarugo:{ id: 'cat-tornillo_tarugo',nombre: 'Tornillo y Tarugo', slug: 'tornillo_tarugo',rol: 'consumible', unidad_default: 'bolsa',     requiere_dimensiones: false, requiere_color: false, orden: 8,  activo: true },
-  mano_obra:      { id: 'cat-mano_obra',      nombre: 'Mano de Obra',      slug: 'mano_obra',      rol: 'servicio',   unidad_default: 'Bs/m²',     requiere_dimensiones: false, requiere_color: false, orden: 9,  activo: true },
-  obra_vendida:   { id: 'cat-obra_vendida',   nombre: 'Obra Vendida',      slug: 'obra_vendida',   rol: 'servicio',   unidad_default: 'Bs/m²',     requiere_dimensiones: false, requiere_color: false, orden: 10, activo: true },
+  placa:          { id: 'cat-placa',          nombre: 'Placa PVC',         slug: 'placa',          rol: 'placa',      metodo: 'placa',                 parametros: {},                                                                           donde_aparece: 'selector',          unidad_default: 'pza',       requiere_dimensiones: true,  requiere_color: true,  orden: 1,  activo: true },
+  montante:       { id: 'cat-montante',       nombre: 'Montante',          slug: 'montante',       rol: 'perfil',     metodo: 'perfil_paralelo',       parametros: { espaciado: 1.2, largo_unidad: 3, incluir_refuerzos: true, umbral_refuerzo: 16 },   donde_aparece: 'tabla',             unidad_default: 'pza (3 m)', requiere_dimensiones: true,  requiere_color: false, orden: 2,  activo: true },
+  omega:          { id: 'cat-omega',          nombre: 'Omega',             slug: 'omega',          rol: 'perfil',     metodo: 'perfil_perpendicular',  parametros: { espaciado: 0.6, largo_unidad: 3 },                                       donde_aparece: 'tabla',             unidad_default: 'pza (3 m)', requiere_dimensiones: true,  requiere_color: false, orden: 3,  activo: true },
+  angulo:         { id: 'cat-angulo',         nombre: 'Angulo',            slug: 'angulo',         rol: 'perfil',     metodo: 'perimetral',            parametros: { largo_unidad: 3 },                                                          donde_aparece: 'tabla',             unidad_default: 'pza (3 m)', requiere_dimensiones: true,  requiere_color: false, orden: 4,  activo: true },
+  cornisa:        { id: 'cat-cornisa',        nombre: 'Cornisa',           slug: 'cornisa',        rol: 'cornisa',    metodo: 'perimetral',            parametros: { largo_unidad: 6 },                                                          donde_aparece: 'tabla',             unidad_default: 'pza (6 m)', requiere_dimensiones: true,  requiere_color: true,  orden: 5,  activo: true },
+  union_h:        { id: 'cat-union_h',        nombre: 'Union H',           slug: 'union_h',        rol: 'union',      metodo: 'empalme',               parametros: { largo_unidad: 6 },                                                          donde_aparece: 'tabla_condicional', unidad_default: 'pza (6 m)', requiere_dimensiones: true,  requiere_color: false, orden: 6,  activo: true },
+  tornillo_t1:    { id: 'cat-tornillo_t1',    nombre: 'Tornillo T1',       slug: 'tornillo_t1',    rol: 'consumible', metodo: 'por_area',              parametros: { rendimiento: 20 },                                                         donde_aparece: 'tabla',             unidad_default: 'bolsa',     requiere_dimensiones: false, requiere_color: false, orden: 7,  activo: true },
+  tornillo_tarugo:{ id: 'cat-tornillo_tarugo',nombre: 'Tornillo y Tarugo', slug: 'tornillo_tarugo',rol: 'consumible', metodo: 'por_area',              parametros: { rendimiento: 20 },                                                         donde_aparece: 'tabla',             unidad_default: 'bolsa',     requiere_dimensiones: false, requiere_color: false, orden: 8,  activo: true },
+  mano_obra:      { id: 'cat-mano_obra',      nombre: 'Mano de Obra',      slug: 'mano_obra',      rol: 'servicio',   metodo: 'servicio_m2_minimo',    parametros: { minimo: 450 },                                                             donde_aparece: 'tabla',             unidad_default: 'Bs/m²',     requiere_dimensiones: false, requiere_color: false, orden: 9,  activo: true },
+  obra_vendida:   { id: 'cat-obra_vendida',   nombre: 'Obra Vendida',      slug: 'obra_vendida',   rol: 'servicio',   metodo: 'servicio_total',        parametros: {},                                                                           donde_aparece: 'oculto',            unidad_default: 'Bs/m²',     requiere_dimensiones: false, requiere_color: false, orden: 10, activo: true },
 };
 
 const variantes = (codigo, color, precio) => ({
@@ -66,12 +66,6 @@ export const INVENTARIO_FALLBACK = {
   config: {
     area_minima: 9,
     monto_minimo_mano_obra: 450,
-    espaciado_montantes: 1.2,
-    espaciado_omegas: 0.6,
-    largo_cornisa: 6,
-    largo_perfil: 3,
     ancho_placa: 0.25,
-    rendimiento_tornillos: 20,
-    umbral_refuerzo_montantes: 16,
   },
 };

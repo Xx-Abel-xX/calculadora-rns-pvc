@@ -100,42 +100,36 @@ export default function Cotizador() {
             </div>
           )}
 
-          {/* Toggles de servicios */}
-          <div className="servicios-toggle">
-            <div className={`servicio-item ${cot.conObraVendida ? 'servicio-item--disabled' : ''}`}>
-              <label className="check">
-                <input
-                  type="checkbox"
-                  checked={cot.conManoObra}
-                  onChange={(e) => cot.setConManoObra(e.target.checked)}
-                  disabled={cot.conObraVendida}
-                />
-                <span>Mano de Obra</span>
-              </label>
-            </div>
-            <div className="servicio-item">
-              <label className="check">
-                <input
-                  type="checkbox"
-                  checked={cot.conObraVendida}
-                  onChange={(e) => cot.setConObraVendida(e.target.checked)}
-                />
-                <span>Obra Vendida</span>
-              </label>
-              {cot.conObraVendida && (
-                <div className="servicio-precio">
-                  <input
-                    type="number"
-                    min="0"
-                    value={cot.precios.obraVendida ?? 140}
-                    onChange={(e) => cot.setPrecioServicio('obraVendida', e.target.value)}
-                    className="servicio-precio__input"
-                  />
-                  <span className="servicio-precio__unidad">Bs/m²</span>
+          {/* Toggles de servicios (data-driven: solo si existen las categorías) */}
+          {(cot.catManoObra || cot.catObraVendida) && (
+            <div className="servicios-toggle">
+              {cot.catManoObra && (
+                <div className={`servicio-item ${cot.conObraVendida ? 'servicio-item--disabled' : ''}`}>
+                  <label className="check">
+                    <input
+                      type="checkbox"
+                      checked={cot.conManoObra}
+                      onChange={(e) => cot.setConManoObra(e.target.checked)}
+                      disabled={cot.conObraVendida}
+                    />
+                    <span>{cot.catManoObra.nombre}</span>
+                  </label>
+                </div>
+              )}
+              {cot.catObraVendida && (
+                <div className="servicio-item">
+                  <label className="check">
+                    <input
+                      type="checkbox"
+                      checked={cot.conObraVendida}
+                      onChange={(e) => cot.setConObraVendida(e.target.checked)}
+                    />
+                    <span>{cot.catObraVendida.nombre}</span>
+                  </label>
                 </div>
               )}
             </div>
-          </div>
+          )}
 
           <TablaMateriales
             filas={cot.filas}

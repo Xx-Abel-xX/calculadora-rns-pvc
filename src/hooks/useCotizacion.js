@@ -1,21 +1,22 @@
 // ============================================
-// HOOK CENTRAL DE ESTADO - useCotizacion
-// Ahora lee el inventario del InventarioContext (Supabase/fallback).
-// Ya no importa PLACAS ni preciosPorDefecto directamente.
+// HOOK CENTRAL DE ESTADO - useCotizacion (v2 data-driven)
+// Itera categorías por rol/método. Sin slugs hardcodeados.
 // ============================================
 
 import { useMemo, useState, useCallback } from 'react';
 import { calcularCotizacion } from '../lib/calculos.js';
 import { elegirMejorCombinacion, elegirMejorOrientacion } from '../lib/orientacion.js';
+import { subtotalConMinimo } from '../lib/metodos-calculo.js';
 import { useInventario } from '../context/InventarioContext.jsx';
 
-// Construye un objeto "placa" compatible con la lógica desde un producto DB
+// Normaliza un producto-placa de la DB al formato que usa la UI
 function normalizarPlaca(producto) {
   if (!producto) return null;
   const precioDefault = producto.variantes?.[0]?.precio ?? 0;
   return {
     id: producto.id,
-    codigo: producto.nombre, // alias de retrocompat con la UI
+    categoriaId: producto.categoria_id,
+    codigo: producto.nombre,
     nombre: producto.nombre,
     familia: producto.nombre,
     largo: Number(producto.largo) || 6,
@@ -31,32 +32,41 @@ function normalizarPlaca(producto) {
   };
 }
 
-// Busca el producto de una categoría por slug
-function buscarPorSlug(productos, slug) {
-  return productos.find((p) => p.categoria?.slug === slug && p.activo !== false);
-}
-
 export function useCotizacion() {
-  const { productos, config, usandoFallback } = useInventario();
+  const { productos, categorias, config, usandoFallback } = useInventario();
 
   // ---------- Inputs ----------
   const [W, setW] = useState('');
   const [L, setL] = useState('');
   const [calculado, setCalculado] = useState(false);
-
   const [placaIdManual, setPlacaIdManual] = useState(null);
   const [orientacionManual, setOrientacionManual] = useState(null);
   const [edicion, setEdicion] = useState({});
-
-  // Precios editables en sesión (NO persistentes - regla de rebajas temporales)
-  // Se inicializan vacíos y se llenan lazy cuando hay inventario
   const [precios, setPrecios] = useState({});
+  const [varianteIdx, setVarianteIdx] = useState({});
+
+  // Toggles de servicios (data-driven: busco categorías con rol 'servicio')
+  const catManoObra = useMemo(() => categorias.find((c) => c.rol === 'servicio' && c.metodo === 'servicio_m2_minimo' && c.activo !== false), [categorias]);
+  const catObraVendida = useMemo(() => categorias.find((c) => c.rol === 'servicio' && c.metodo === 'servicio_total' && c.activo !== false), [categorias]);
 
   const [conManoObra, setConManoObra] = useState(false);
   const [conObraVendida, setConObraVendida] = useState(false);
-  const [varianteIdx, setVarianteIdx] = useState({});
 
-  // ---------- Placas disponibles (solo las de rol 'placa') ----------
+  // ---------- Categorías activas (excepto servicios que son toggles) ----------
+  const categoriasActivas = useMemo(() => {
+    return categorias.filter((c) => {
+      if (c.activo === false) return false;
+      // Los servicios se manejan por toggle
+      if (c.rol === 'servicio') {
+        if (c.metodo === 'servicio_total') return conObraVendida;
+        if (c.metodo === 'servicio_m2_minimo') return conManoObra && !conObraVendida;
+        return false;
+      }
+      return true;
+    });
+  }, [categorias, conManoObra, conObraVendida]);
+
+  // ---------- Placas disponibles ----------
   const placasDisponibles = useMemo(() => {
     return productos
       .filter((p) => p.categoria?.rol === 'placa' && p.activo !== false)
@@ -64,57 +74,34 @@ export function useCotizacion() {
       .filter(Boolean);
   }, [productos]);
 
-  // ---------- Config de cálculo (desde DB) ----------
+  // ---------- Config global ----------
   const cfg = useMemo(() => ({
     anchoPlaca: config.ancho_placa ?? 0.25,
-    largoPerfil: config.largo_perfil ?? 3,
-    espaciadoMontantes: config.espaciado_montantes ?? 1.2,
-    espaciadoOmegas: config.espaciado_omegas ?? 0.6,
-    largoCornisa: config.largo_cornisa ?? 6,
-    rendimientoTornillos: config.rendimiento_tornillos ?? 20,
-    umbralRefuerzoMontantes: config.umbral_refuerzo_montantes ?? 16,
+    areaMinima: config.area_minima ?? 9,
   }), [config]);
 
-  // ---------- Mapa de precios default desde inventario ----------
+  // ---------- Precios default desde inventario ----------
   const preciosDefault = useMemo(() => {
     const map = {};
     for (const p of productos) {
-      const rol = p.categoria?.rol;
-      const slug = p.categoria?.slug;
-      // Precio de la primera variante activa
       const vActiva = p.variantes?.find((v) => v.activo !== false) ?? p.variantes?.[0];
       const precio = vActiva?.precio ?? 0;
-
-      if (rol === 'placa') {
+      if (p.categoria?.rol === 'placa') {
         map[`placa:${p.id}`] = precio;
       } else {
-        // Mapear slug a la clave que usa calculos
-        const claveMap = {
-          montante: 'montante',
-          omega: 'omega',
-          angulo: 'angulo',
-          cornisa: 'cornisa',
-          union_h: 'unionH',
-          tornillo_t1: 'tornilloT1',
-          tornillo_tarugo: 'tornilloTarugo',
-          mano_obra: 'manoObra',
-          obra_vendida: 'obraVendida',
-        };
-        const clave = claveMap[slug];
-        if (clave) map[clave] = precio;
+        map[p.categoria_id] = precio;
       }
     }
     return map;
   }, [productos]);
 
-  // Precios efectivos: default de DB + overrides de sesión
   const preciosEfectivos = useMemo(() => ({ ...preciosDefault, ...precios }), [preciosDefault, precios]);
 
   // ---------- Mejor combinación automática ----------
   const mejorAuto = useMemo(() => {
-    if (!calculado || placasDisponibles.length === 0) return null;
-    return elegirMejorCombinacion(Number(W), Number(L), placasDisponibles, preciosEfectivos, cfg);
-  }, [calculado, W, L, placasDisponibles, preciosEfectivos, cfg]);
+    if (!calculado || placasDisponibles.length === 0 || categoriasActivas.length === 0) return null;
+    return elegirMejorCombinacion(Number(W), Number(L), placasDisponibles, categoriasActivas, preciosEfectivos, cfg);
+  }, [calculado, W, L, placasDisponibles, categoriasActivas, preciosEfectivos, cfg]);
 
   // ---------- Placa efectiva ----------
   const placa = useMemo(() => {
@@ -123,7 +110,6 @@ export function useCotizacion() {
     return mejorAuto?.placa;
   }, [calculado, placasDisponibles, placaIdManual, mejorAuto]);
 
-  // ---------- Variante efectiva ----------
   const variante = useMemo(() => {
     if (!placa) return null;
     const idx = varianteIdx[placa.id] ?? 0;
@@ -134,10 +120,10 @@ export function useCotizacion() {
   const orientacionOptima = useMemo(() => {
     if (!calculado || !placa) return 'L';
     if (placaIdManual) {
-      return elegirMejorOrientacion(Number(W), Number(L), placa.largo, placa.id, preciosEfectivos, cfg, placasDisponibles).orientacion;
+      return elegirMejorOrientacion(Number(W), Number(L), placa, categoriasActivas, preciosEfectivos, cfg).orientacion;
     }
-    return mejorAuto.orientacion;
-  }, [calculado, placa, placaIdManual, W, L, preciosEfectivos, cfg, placasDisponibles, mejorAuto]);
+    return mejorAuto?.orientacion ?? 'L';
+  }, [calculado, placa, placaIdManual, W, L, categoriasActivas, preciosEfectivos, cfg, mejorAuto]);
 
   const orientacion = orientacionManual ?? orientacionOptima;
   const esOptima = orientacion === orientacionOptima;
@@ -145,19 +131,18 @@ export function useCotizacion() {
   // ---------- Cotización ----------
   const cot = useMemo(() => {
     if (!calculado || !placa) return null;
-    return calcularCotizacion(Number(W), Number(L), placa.largo, orientacion, cfg);
-  }, [calculado, placa, W, L, orientacion, cfg]);
+    return calcularCotizacion(Number(W), Number(L), placa.largo, orientacion, categoriasActivas, cfg);
+  }, [calculado, placa, W, L, orientacion, categoriasActivas, cfg]);
 
-  // ---------- Acción Calcular ----------
+  // ---------- Acciones ----------
   const calcular = useCallback(() => {
     const w = Number(W);
     const l = Number(L);
     if (!w || !l || w <= 0 || l <= 0) return false;
     setEdicion({});
-    setPrecios({}); // reset rebajas temporales
+    setPrecios({});
     setPlacaIdManual(null);
     setOrientacionManual(null);
-    setManoObraOverride(null);
     setCalculado(true);
     return true;
   }, [W, L]);
@@ -206,150 +191,99 @@ export function useCotizacion() {
   const setWReset = useCallback((v) => { setW(v); resetSi(); }, [resetSi]);
   const setLReset = useCallback((v) => { setL(v); resetSi(); }, [resetSi]);
 
-  // ---------- Filas de la tabla (data-driven desde categorías) ----------
-  const filas = useMemo(() => {
-    if (!cot || !placa) return [];
-
-    // Mapeo: slug de categoría → clave en cantidades
-    const slugToCant = {
-      montante: 'montante',
-      omega: 'omega',
-      angulo: 'angulo',
-      cornisa: 'cornisa',
-      union_h: 'unionH',
-      tornillo_t1: 'tornilloT1',
-      tornillo_tarugo: 'tornilloTarugo',
-    };
-
-    const filasBase = [];
-
-    // Placa primero
-    const precioPlaca = preciosEfectivos[`placa:${placa.id}`] ?? placa.precioDefault ?? 0;
-    const detallePlaca = variante ? variante.codigo : placa.codigo;
-    filasBase.push({
-      clave: 'placa',
-      detalle: detallePlaca,
-      cantidad: cot.cantidades.placa,
-      precio: precioPlaca,
-      editable: true,
-    });
-
-    // Montante con nota de refuerzos
-    const prodMontante = buscarPorSlug(productos, 'montante');
-    if (prodMontante) {
-      filasBase.push({
-        clave: 'montante',
-        detalle: prodMontante.nombre,
-        cantidad: cot.cantidades.montante,
-        precio: preciosEfectivos.montante ?? 0,
-        editable: true,
-        nota: `+${cot.montantes - cot.montantesBase} refuerzo(s)`,
-      });
-    }
-
-    // Resto de categorías (data-driven)
-    for (const [slug, clave] of Object.entries(slugToCant)) {
-      if (slug === 'montante') continue; // ya hecho
-      const prod = buscarPorSlug(productos, slug);
-      if (!prod) continue;
-
-      // Union H solo si requiere
-      if (clave === 'unionH' && !cot.requiereUnionH) continue;
-
-      filasBase.push({
-        clave,
-        detalle: prod.nombre,
-        cantidad: cot.cantidades[clave],
-        precio: preciosEfectivos[clave] ?? 0,
-        editable: true,
-      });
-    }
-
-    // Mano de Obra como fila (solo si está activa y no Obra Vendida)
-    if (conManoObra && !conObraVendida) {
-      const areaRedondeada = Math.ceil(Math.max(cot.area, config.area_minima ?? 9));
-      filasBase.push({
-        clave: 'manoObra',
-        detalle: 'Mano de Obra',
-        cantidad: areaRedondeada,
-        precio: preciosEfectivos.manoObra ?? 30,
-        editable: true,
-        esManoObra: true,
-      });
-    }
-
-    // Monto mínimo de mano de obra (regla de negocio: 3x3 = 450 Bs)
-    const montoMinimoMO = config.monto_minimo_mano_obra ?? 450;
-
-    // Aplicar ediciones
-    return filasBase.map((f) => {
-      const ed = edicion[f.clave];
-      // Subtotal base: para Mano de Obra aplica el mínimo (no baja de 450)
-      const calcularSubtotal = () => {
-        const calc = f.cantidad * f.precio;
-        if (f.esManoObra) return Math.max(calc, montoMinimoMO);
-        return calc;
-      };
-      if (!ed) return { ...f, subtotal: calcularSubtotal(), modificado: false };
-      const cantidad = ed.cantidad ?? f.cantidad;
-      const precio = ed.precio ?? f.precio;
-      const detalle = ed.detalle ?? f.detalle;
-      const subtotal = ed.subtotal ?? calcularSubtotal();
-      return { ...f, cantidad, precio, detalle, subtotal, modificado: true };
-    });
-  }, [cot, placa, variante, productos, edicion, preciosEfectivos, conManoObra, conObraVendida, config.area_minima, config.monto_minimo_mano_obra]);
-
-  // ---------- Totales ----------
-  const subtotalMateriales = useMemo(
-    () => filas.filter((f) => !f.esManoObra).reduce((acc, f) => acc + f.subtotal, 0),
-    [filas]
-  );
-
-  const AREA_MINIMA = config.area_minima ?? 9;
-  const areaFacturable = useMemo(() => {
-    if (!cot) return AREA_MINIMA;
-    return Math.max(cot.area, AREA_MINIMA);
-  }, [cot, AREA_MINIMA]);
-
-  // Override manual del monto de Mano de Obra (null = usar cálculo automático)
-  const [manoObraOverride, setManoObraOverride] = useState(null);
-
-  const montoManoObra = useMemo(() => {
-    if (manoObraOverride !== null) return manoObraOverride;
-    return Math.ceil(areaFacturable) * (preciosEfectivos.manoObra ?? 30);
-  }, [areaFacturable, preciosEfectivos, manoObraOverride]);
-
-  // Total: si hay MO como fila, ya está incluida en filas; si Obra Vendida, anula todo
-  const totalFinal = useMemo(() => {
-    if (conObraVendida) {
-      return Math.ceil(areaFacturable) * (preciosEfectivos.obraVendida ?? 140);
-    }
-    return filas.reduce((acc, f) => acc + f.subtotal, 0);
-  }, [conObraVendida, filas, areaFacturable, preciosEfectivos]);
-
   const setPrecioServicio = useCallback((clave, valor) => {
     setPrecios((prev) => ({ ...prev, [clave]: Math.max(0, Number(valor) || 0) }));
   }, []);
 
-  const setMontoManoObra = useCallback((valor) => {
-    if (valor === '' || valor === null) {
-      setManoObraOverride(null);
-      // limpiar override de subtotal en edicion
-      setEdicion((prev) => {
-        const copia = { ...prev };
-        if (copia.manoObra) delete copia.manoObra;
-        return copia;
+  // ---------- Filas de la tabla (data-driven) ----------
+  const filas = useMemo(() => {
+    if (!cot || !placa) return [];
+    const filasBase = [];
+
+    for (const cat of categoriasActivas) {
+      const calc = cot.cantidades[cat.id];
+      if (!calc) continue;
+      const { cantidad, metadata } = calc;
+
+      // Determinar el producto (primer producto activo de la categoría)
+      const prod = productos.find((p) => p.categoria_id === cat.id && p.activo !== false);
+      if (!prod) continue;
+
+      // Precio
+      let precio;
+      let detalle;
+      if (cat.rol === 'placa') {
+        precio = preciosEfectivos[`placa:${placa.id}`] ?? placa.precioDefault ?? 0;
+        detalle = variante ? variante.codigo : placa.codigo;
+      } else {
+        precio = preciosEfectivos[cat.id] ?? 0;
+        detalle = prod.nombre;
+      }
+
+      // Para servicios, el detalle es el nombre de la categoría
+      if (metadata.esServicio) {
+        detalle = cat.nombre;
+      }
+
+      filasBase.push({
+        clave: cat.id,
+        detalle,
+        cantidad,
+        precio,
+        editable: true,
+        esServicio: Boolean(metadata.esServicio),
+        aplicaMinimo: Boolean(metadata.aplicaMinimo),
+        minimo: metadata.minimo,
+        anulaTabla: Boolean(metadata.anulaTabla),
+        nota: metadata.nota,
+        metadata,
       });
-    } else {
-      const v = Math.max(0, Number(valor) || 0);
-      setManoObraOverride(v);
-      // Aplicar como subtotal override de la fila
-      setEdicion((prev) => ({
-        ...prev,
-        manoObra: { ...prev.manoObra, subtotal: v },
-      }));
     }
-  }, []);
+
+    // Aplicar ediciones + calcular subtotal
+    return filasBase.map((f) => {
+      const ed = edicion[f.clave];
+      const cantidad = ed?.cantidad ?? f.cantidad;
+      const precio = ed?.precio ?? f.precio;
+      const detalle = ed?.detalle ?? f.detalle;
+
+      // Subtotal
+      let subtotal;
+      if (ed?.subtotal != null) {
+        subtotal = ed.subtotal; // override manual (Mano de Obra)
+      } else if (f.aplicaMinimo) {
+        subtotal = subtotalConMinimo(cantidad, precio, f.minimo);
+      } else {
+        subtotal = cantidad * precio;
+      }
+
+      return {
+        ...f,
+        cantidad, precio, detalle, subtotal,
+        modificado: Boolean(ed),
+      };
+    });
+  }, [cot, placa, variante, categoriasActivas, productos, edicion, preciosEfectivos]);
+
+  // ---------- Totales ----------
+  const subtotalMateriales = useMemo(
+    () => filas.filter((f) => !f.esServicio).reduce((acc, f) => acc + f.subtotal, 0),
+    [filas]
+  );
+
+  const areaFacturable = cot?.areaFacturable ?? Math.max(Number(W) * Number(L) || 0, cfg.areaMinima);
+
+  // Total: si hay categoría anulaTabla (Obra Vendida), solo esa
+  const filaAnulaTabla = filas.find((f) => f.anulaTabla);
+  const totalFinal = useMemo(() => {
+    if (filaAnulaTabla) return filaAnulaTabla.subtotal;
+    return filas.reduce((acc, f) => acc + f.subtotal, 0);
+  }, [filas, filaAnulaTabla]);
+
+  const montoManoObra = useMemo(() => {
+    const f = filas.find((x) => x.aplicaMinimo);
+    return f?.subtotal ?? 0;
+  }, [filas]);
 
   return {
     W, L,
@@ -364,11 +298,13 @@ export function useCotizacion() {
     precios: preciosEfectivos,
     setPrecioServicio,
     placasDisponibles,
+    categoriasActivas,
     conManoObra, setConManoObra,
     conObraVendida, setConObraVendida,
-    montoManoObra, manoObraOverride, setMontoManoObra,
-    areaFacturable,
+    catManoObra, catObraVendida,
+    montoManoObra, areaFacturable,
     subtotalMateriales, totalFinal,
     usandoFallback,
+    filaAnulaTabla,
   };
 }

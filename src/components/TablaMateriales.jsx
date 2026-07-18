@@ -5,8 +5,9 @@
 import NumeroAnimado from './NumeroAnimado.jsx';
 
 function Spinner({ value, onChange, step = 1, min = 0 }) {
-  const inc = () => onChange(Number(value) + step);
-  const dec = () => onChange(Math.max(min, Number(value) - step));
+  const num = Number(value) || 0;
+  const inc = () => onChange(num + step);
+  const dec = () => onChange(Math.max(min, num - step));
   return (
     <div className="spinner">
       <button type="button" className="spinner__step" onClick={dec} aria-label="Restar">−</button>
@@ -80,14 +81,14 @@ export default function TablaMateriales({
                   )}
                 </td>
                 <td className="col-num col-subtotal">
-                  {f.esManoObra ? (
+                  {f.aplicaMinimo ? (
                     <Spinner
                       value={f.subtotal}
                       onChange={(v) => editarCelda(f.clave, 'subtotal', v)}
                       step={10}
                     />
                   ) : (
-                    <NumeroAnimado valor={f.subtotal} duracion={250} />
+                    <span className="num-estatico">{f.subtotal.toLocaleString('es-BO')}</span>
                   )}
                 </td>
                 <td className="col-rest">

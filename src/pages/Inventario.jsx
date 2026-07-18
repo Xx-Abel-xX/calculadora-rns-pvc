@@ -1,17 +1,45 @@
 // Página de Gestión de Inventario.
-// Tabla con filtros, búsqueda, crear/editar/eliminar productos.
+// Sub-pestañas: Productos | Categorías.
 
 import { useState, useMemo } from 'react';
 import { useInventario } from '../context/InventarioContext.jsx';
 import ProductoForm from '../components/inventario/ProductoForm.jsx';
+import CategoriasPanel from '../components/inventario/CategoriasPanel.jsx';
 import Toast from '../components/inventario/Toast.jsx';
 import { eliminarProducto, actualizarProducto } from '../lib/inventario.js';
 
 export default function Inventario() {
-  const { productos, categorias, config, cargando, usandoFallback, recargar } = useInventario();
+  const [subTab, setSubTab] = useState('productos');
+
+  // Si la sub-pestaña es Categorías, delegar al panel
+  if (subTab === 'categorias') {
+    return (
+      <div className="inv-page">
+        <div className="subtabs">
+          <button className={`tab ${subTab === 'productos' ? 'tab--active' : ''}`} onClick={() => setSubTab('productos')}>Productos</button>
+          <button className={`tab ${subTab === 'categorias' ? 'tab--active' : ''}`} onClick={() => setSubTab('categorias')}>Categorías</button>
+        </div>
+        <CategoriasPanel />
+      </div>
+    );
+  }
+
+  return (
+    <div className="inv-page">
+      <div className="subtabs">
+        <button className={`tab ${subTab === 'productos' ? 'tab--active' : ''}`} onClick={() => setSubTab('productos')}>Productos</button>
+        <button className={`tab ${subTab === 'categorias' ? 'tab--active' : ''}`} onClick={() => setSubTab('categorias')}>Categorías</button>
+      </div>
+      <ProductosPanel />
+    </div>
+  );
+}
+
+function ProductosPanel() {
+  const { productos, categorias, cargando, usandoFallback, recargar } = useInventario();
   const [filtroCat, setFiltroCat] = useState('');
   const [busqueda, setBusqueda] = useState('');
-  const [modal, setModal] = useState(null); // null | 'nuevo' | producto
+  const [modal, setModal] = useState(null);
   const [toast, setToast] = useState(null);
 
   const mostrarToast = (tipo, mensaje) => setToast({ tipo, mensaje });

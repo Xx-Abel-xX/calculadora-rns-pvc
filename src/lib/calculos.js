@@ -1,63 +1,41 @@
 // ============================================
-// LÓGICA MATEMÁTICA Y REGLAS DE NEGOCIO - RNS PVC
-// Generalizada: maneja cualquier cantidad de empalmes (Unión H).
-// Las constantes vienen de config (DB) con defaults para no romper.
+// LÓGICA DE CÁLCULO - RNS PVC (v2 data-driven)
+// ============================================
+// La placa tiene su propia función (optimización compleja con empalmes).
+// El resto de categorías se calcula con el dispatcher de métodos.
 // ============================================
 
-// Defaults si no se pasa config (mantienen la app funcionando)
+import { calcularPorMetodo } from './metodos-calculo.js';
+
 const DEFAULTS = {
   anchoPlaca: 0.25,
-  largoPerfil: 3,
-  espaciadoMontantes: 1.2,
-  espaciadoOmegas: 0.6,
-  largoCornisa: 6,
-  rendimientoTornillos: 20,
-  umbralRefuerzoMontantes: 16,
 };
 
 /**
- * Calcula todas las cantidades de materiales.
- *
- * @param {number} W           Ancho (m)
- * @param {number} L           Largo (m)
- * @param {number} L_plate     Largo de placa (4 o 6)
- * @param {'L'|'W'} orientacion
- * @param {object} cfg         Configuración desde DB (opcional)
+ * Cálculo de placas y unión H (optimización de cortes).
+ * Devuelve: totalPlacas, requiereUnionH, empalmesPorFila, infoCorte, filas.
  */
-export function calcularCotizacion(W, L, L_plate, orientacion, cfg = {}) {
-  W = Number(W);
-  L = Number(L);
-  L_plate = Number(L_plate);
-
-  // Merge config
+export function calcularPlacas(W, L, L_plate, orientacion, cfg = {}) {
   const c = { ...DEFAULTS, ...cfg };
   const anchoPlaca = Number(c.anchoPlaca);
-  const largoPerfil = Number(c.largoPerfil);
 
-  const D_plates = orientacion === 'L' ? L : W;
-  const D_perp   = orientacion === 'L' ? W : L;
+  const D_plates = orientacion === 'L' ? Number(L) : Number(W);
+  const D_perp   = orientacion === 'L' ? Number(W) : Number(L);
 
-  const perimetro = 2 * (W + L);
-  const area = W * L;
-
-  // ---------- A. Placas y Unión H ----------
   const filas = Math.ceil(D_perp / anchoPlaca);
   const placasPorFila = Math.ceil(D_plates / L_plate);
   const empalmesPorFila = placasPorFila - 1;
 
   let totalPlacas;
   let requiereUnionH;
-  let unionH_piezas;
   let infoCorte = '';
 
   if (placasPorFila <= 1) {
     requiereUnionH = false;
-    unionH_piezas = 0;
     totalPlacas = filas;
     infoCorte = `Cobertura completa: ${D_plates.toFixed(2)} m ≤ ${L_plate} m de placa`;
   } else {
     requiereUnionH = true;
-    unionH_piezas = empalmesPorFila * Math.ceil(D_perp / largoPerfil);
     const retazo = D_plates - (placasPorFila - 1) * L_plate;
 
     if (retazo >= L_plate - 0.0001) {
@@ -77,52 +55,79 @@ export function calcularCotizacion(W, L, L_plate, orientacion, cfg = {}) {
     }
   }
 
-  // ---------- B. Estructura ----------
-  const lineasMontantes = Math.ceil(D_perp / c.espaciadoMontantes);
-  const metrosMontantes = lineasMontantes * D_plates;
-  const montantesBase = Math.ceil(metrosMontantes / largoPerfil);
-  const refuerzosMontantes = Math.ceil(area / c.umbralRefuerzoMontantes);
-  const montantes = montantesBase + refuerzosMontantes;
-
-  const lineasOmegas = Math.ceil(D_plates / c.espaciadoOmegas);
-  const metrosOmegas = lineasOmegas * D_perp;
-  const omegas = Math.ceil(metrosOmegas / largoPerfil);
-
-  const angulares = Math.ceil(perimetro / largoPerfil);
-
-  // ---------- C. Consumibles ----------
-  const cornisas = Math.ceil(perimetro / c.largoCornisa);
-  const bolsasT1 = Math.ceil(area / c.rendimientoTornillos);
-  const bolsasTarugos = Math.ceil(area / c.rendimientoTornillos);
-
-  const cantidades = {
-    placa: totalPlacas,
-    montante: montantes,
-    omega: omegas,
-    angulo: angulares,
-    cornisa: cornisas,
-    unionH: unionH_piezas,
-    tornilloT1: bolsasT1,
-    tornilloTarugo: bolsasTarugos,
+  return {
+    totalPlacas,
+    requiereUnionH,
+    empalmesPorFila,
+    filas,
+    placasPorFila,
+    infoCorte,
+    D_plates,
+    D_perp,
   };
+}
+
+/**
+ * Cálculo principal: recibe las categorías y calcula todo.
+ *
+ * @param {number} W
+ * @param {number} L
+ * @param {number} L_plate
+ * @param {'L'|'W'} orientacion
+ * @param {Array} categorias  Lista de categorías activas (con metodo/parametros)
+ * @param {object} cfg         Config global { anchoPlaca, areaMinima }
+ */
+export function calcularCotizacion(W, L, L_plate, orientacion, categorias = [], cfg = {}) {
+  W = Number(W);
+  L = Number(L);
+  L_plate = Number(L_plate);
+
+  const c = { ...DEFAULTS, ...cfg };
+  const areaMinima = Number(c.areaMinima) || 9;
+  const areaFacturable = Math.max(W * L, areaMinima);
+
+  // Geometría base para todos los métodos
+  const D_plates = orientacion === 'L' ? L : W;
+  const D_perp   = orientacion === 'L' ? W : L;
+  const perimetro = 2 * (W + L);
+  const area = W * L;
+
+  // 1. Calcular placas primero (necesitamos saber si requiere unión H)
+  const catPlaca = categorias.find((cat) => cat.rol === 'placa');
+  const calcPlaca = catPlaca
+    ? calcularPlacas(W, L, L_plate, orientacion, cfg)
+    : { totalPlacas: 0, requiereUnionH: false, empalmesPorFila: 0, filas: 0, placasPorFila: 0, infoCorte: '', D_plates, D_perp };
+
+  const geom = {
+    W, L, D_plates, D_perp, perimetro, area, L_plate,
+    requiereUnionH: calcPlaca.requiereUnionH,
+    empalmesPorFila: calcPlaca.empalmesPorFila,
+    areaFacturable,
+    areaMinima,
+  };
+
+  // 2. Calcular cada categoría por su método
+  // cantidades: { [categoriaId]: { cantidad, metadata } }
+  const cantidades = {};
+  for (const cat of categorias) {
+    if (cat.rol === 'placa') {
+      cantidades[cat.id] = { cantidad: calcPlaca.totalPlacas, metadata: { esPlaca: true, nota: calcPlaca.infoCorte } };
+    } else {
+      cantidades[cat.id] = calcularPorMetodo(cat, geom);
+    }
+  }
 
   return {
     W, L, L_plate, orientacion,
-    D_plates, D_perp, perimetro, area,
+    D_plates, D_perp, perimetro, area, areaFacturable,
     cantidades,
-    filas,
-    placasPorFila,
-    empalmesPorFila,
-    requiereUnionH,
-    unionH_piezas,
-    infoCorte,
-    totalPlacas,
-    montantesBase,
-    montantes,
-    omegas,
-    angulares,
-    cornisas,
-    bolsasT1,
-    bolsasTarugos,
+    // Metadata de placa para el gráfico
+    filas: calcPlaca.filas,
+    placasPorFila: calcPlaca.placasPorFila,
+    empalmesPorFila: calcPlaca.empalmesPorFila,
+    requiereUnionH: calcPlaca.requiereUnionH,
+    infoCorte: calcPlaca.infoCorte,
+    totalPlacas: calcPlaca.totalPlacas,
+    L_plate,
   };
 }
