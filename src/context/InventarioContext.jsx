@@ -13,6 +13,7 @@ import {
 } from '../lib/inventario.js';
 import { supabaseListo } from '../lib/supabase.js';
 import { INVENTARIO_FALLBACK } from '../data/fallback.js';
+import { normalizarCategoria } from '../lib/metodos-calculo.js';
 
 const InventarioContext = createContext(null);
 
@@ -50,7 +51,7 @@ export function InventarioProvider({ children }) {
       if (catRes.error) throw catRes.error;
       if (prodRes.error) throw prodRes.error;
 
-      setCategorias(catRes.data || []);
+      setCategorias((catRes.data || []).map(normalizarCategoria));
       setProductos(prodRes.data || []);
 
       const configMap = {};

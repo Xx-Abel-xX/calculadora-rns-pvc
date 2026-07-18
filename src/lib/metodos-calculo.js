@@ -81,6 +81,35 @@ export const DONDE_APARECE = {
   oculto: 'Oculto (toggle aparte)',
 };
 
+// ============================================
+// COMPATIBILIDAD HACIA ATRÁS
+// Si una categoría viene de una DB vieja (sin metodo/parametros),
+// se infiere según su slug. Así la app no se rompe.
+// ============================================
+const METODO_POR_SLUG = {
+  placa:           { metodo: 'placa',                 parametros: {} },
+  montante:        { metodo: 'perfil_paralelo',       parametros: { espaciado: 1.2, largo_unidad: 3, incluir_refuerzos: true, umbral_refuerzo: 16 } },
+  omega:           { metodo: 'perfil_perpendicular',  parametros: { espaciado: 0.6, largo_unidad: 3 } },
+  angulo:          { metodo: 'perimetral',            parametros: { largo_unidad: 3 } },
+  cornisa:         { metodo: 'perimetral',            parametros: { largo_unidad: 6 } },
+  union_h:         { metodo: 'empalme',               parametros: { largo_unidad: 6 } },
+  tornillo_t1:     { metodo: 'por_area',              parametros: { rendimiento: 20 } },
+  tornillo_tarugo: { metodo: 'por_area',              parametros: { rendimiento: 20 } },
+  mano_obra:       { metodo: 'servicio_m2_minimo',    parametros: { minimo: 450 } },
+  obra_vendida:    { metodo: 'servicio_total',        parametros: {} },
+};
+
+// Normaliza una categoría: si le falta metodo/parametros, los infiere por slug
+export function normalizarCategoria(cat) {
+  if (!cat) return cat;
+  if (cat.metodo) return cat; // ya tiene el schema nuevo
+  const inferencia = METODO_POR_SLUG[cat.slug];
+  if (inferencia) {
+    return { ...cat, metodo: inferencia.metodo, parametros: inferencia.parametros };
+  }
+  return cat;
+}
+
 /**
  * Calcula la cantidad de una categoría según su método.
  *
