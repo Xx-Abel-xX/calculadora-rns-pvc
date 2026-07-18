@@ -160,15 +160,27 @@ export function useCotizacion() {
   }, [orientacionOptima]);
 
   const editarCelda = useCallback((clave, campo, valor) => {
-    setEdicion((prev) => ({
-      ...prev,
-      [clave]: {
-        ...prev[clave],
-        [campo]: campo === 'cantidad' || campo === 'precio' || campo === 'subtotal'
-          ? Math.max(0, Number(valor) || 0)
-          : valor,
-      },
-    }));
+    setEdicion((prev) => {
+      const actual = prev[clave] || {};
+      const nuevoCampo = campo === 'cantidad' || campo === 'precio' || campo === 'subtotal'
+        ? Math.max(0, Number(valor) || 0)
+        : valor;
+
+      // Si se edita cantidad o precio de una fila que tenía subtotal overrideado,
+      // limpiar el override para que el subtotal se recalcule (respetando el mínimo).
+      if ((campo === 'cantidad' || campo === 'precio') && 'subtotal' in actual) {
+        const { subtotal, ...sinSubtotal } = actual;
+        return {
+          ...prev,
+          [clave]: { ...sinSubtotal, [campo]: nuevoCampo },
+        };
+      }
+
+      return {
+        ...prev,
+        [clave]: { ...actual, [campo]: nuevoCampo },
+      };
+    });
   }, []);
 
   const restablecerFila = useCallback((clave) => {
